@@ -1,3 +1,7 @@
+function cat(){
+    return 'hey'
+}
+
 new Cat({
     el: '#container',
     data: {
@@ -6,6 +10,9 @@ new Cat({
     methods: {
         sayHello() {
             alert('hello')
+        },
+        cat() {
+            return 99
         }
     },
     created() {

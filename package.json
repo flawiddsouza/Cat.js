@@ -4,9 +4,15 @@
     "browser": "dist/cat.iife.js",
     "scripts": {
         "build": "rollup --config",
-        "dev": "rollup --config --watch"
+        "dev": "rollup --config --watch",
+        "test": "mocha --require @babel/register"
     },
     "dependencies": {
+        "@babel/core": "^7.4.5",
+        "@babel/preset-env": "^7.4.5",
+        "@babel/register": "^7.4.4",
+        "chai": "^4.2.0",
+        "mocha": "^6.1.4",
         "rollup": "^1.12.3"
     }
 }

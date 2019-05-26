@@ -105,6 +105,8 @@ function tokenize(string) {
     })
     // end - handle 'string' & "string" strings
 
+    tokens = tokens.filter(token => token.trim())
+
     let tokens2 = []
 
     tokens.forEach(token => {
@@ -159,3 +161,8 @@ function handleInterpolatedString(string) {
 
     return tokens
 }
+
+export default tokenize
+
+// let string1 = 'cat() + 1 + ` ${cat()}`'
+// console.log(string1 +'\n', tokenize(string1))

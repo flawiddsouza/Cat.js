@@ -1,3 +1,5 @@
+import tokenize from './tokenizer'
+
 export default class Cat {
     constructor(paramsObject) {
 
@@ -40,39 +42,31 @@ export default class Cat {
         element.style.display = 'none'
     }
 
-    tokenize(string) {
-        return string.split(/(\s+)/).filter(e => e.trim().length >= 1)
-    }
-
     handleEcho(expression, element, data=null) {
         let regex = /{{ *(.*?) *}}/g
         let matches = [...expression.matchAll(regex)].map(item => item[1])
 
-        let mathExpressionRegex = /(?:(?:^|[-+_*/])(?:\s*-?\d+(\.\d+)?(?:[eE][+-]?\d+)?\s*))+$/
-
         matches.forEach(match => {
-            let out
-            try {
-                if(mathExpressionRegex.test(match)) {
-                    out = eval(match)
-                } else {
-                    throw 'Not a math expression'
-                }
-                console.log('eval success: ' + match)
-            } catch(e) {
-                console.log('eval error: ' + match)
-                let newString
-                if(data) {
-                    console.log(this.tokenize(match))
-                    newString = match.replace(match, `data.${match}`)
-                } else {
-                    newString = match.replace(match, `this.${match}`)
-                }
-                console.log('eval fixed: ' + newString)
-                out = eval(newString)
-            }
+            let tokens  = tokenize(match)
 
-            console.log('output: ' + out, '\n\n')
+            let newString = ''
+
+            console.log(tokens)
+            tokens.forEach(token => {
+                if(token.type === 'Variable') {
+                    if(data.hasOwnProperty(token.value)) {
+                        newString += 'data.' + token.value
+                    } else if(this.hasOwnProperty(token.value)) {
+                        newString += 'this.' + token.value
+                    } else {
+                        newString += token.value
+                    }
+                } else {
+                    newString += token.value
+                }
+            })
+
+            let out = eval(newString)
 
             let escapedMatch = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             let regex = new RegExp(`{{.*?${escapedMatch}.*?}}`)

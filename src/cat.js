@@ -1,4 +1,4 @@
-class Cat {
+export default class Cat {
     constructor(paramsObject) {
 
         // handle data
@@ -14,7 +14,7 @@ class Cat {
                 this[key] = paramsObject.methods[key]
             }
         }
-        
+
         // handle created()
         if(paramsObject.created) {
             paramsObject.created.call(this)
@@ -33,7 +33,7 @@ class Cat {
             }
 
         })
-        
+
     }
 
     hideElement(element) {
@@ -73,7 +73,7 @@ class Cat {
             }
 
             console.log('output: ' + out, '\n\n')
-            
+
             let escapedMatch = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             let regex = new RegExp(`{{.*?${escapedMatch}.*?}}`)
             element.innerHTML = element.innerHTML.replace(regex, out)
@@ -84,7 +84,7 @@ class Cat {
         var loopElements = Array.from(this.rootElement.querySelectorAll('[data-loop]'))
 
         loopElements.forEach(loopElement => {
-            
+
             let parent = loopElement.parentElement
 
             let html = ''
@@ -99,11 +99,11 @@ class Cat {
                 parent.appendChild(loopElementCopy)
 
             })
-            
+
             parent.insertAdjacentHTML('beforeend', html)
 
             this.hideElement(loopElement)
-            
+
         })
     }
 }

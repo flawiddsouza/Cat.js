@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "module": "dist/cat.esm.js",
+    "browser": "dist/cat.iife.js",
+    "scripts": {
+        "build": "rollup --config",
+        "dev": "rollup --config --watch"
+    },
+    "dependencies": {
+        "rollup": "^1.12.3"
+    }
+}

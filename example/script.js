@@ -9,7 +9,7 @@ new Cat({
         }
     },
     created() {
-        for(let i=0; i<=100; i++) {
+        for(let i=0; i<=20; i++) {
             this.items.push({
                 id: i,
                 name: 'Hey ' + i

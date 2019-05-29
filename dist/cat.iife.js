@@ -41,17 +41,18 @@ var Cat = (function () {
         let currentLastIndex;
 
         // start - handle ` strings
-        // console.log(tokens) // till here we get all `` tokens
-        tokens.forEach((item, index) => { // missing `` items caused by this block
+        tokens.forEach((item, index) => {
+            let started = false;
             if(item.startsWith('`')) {
                 currentStartIndex = index;
                 currentLastIndex = 9999999999;
                 block[currentStartIndex] = [];
+                started = true;
             }
             if(index >= currentStartIndex && index <= currentLastIndex) {
                 block[currentStartIndex].push(item);
             }
-            if(item.endsWith('`')) {
+            if(!started && item.endsWith('`')) {
                 currentLastIndex = index;
                 blockJoined.push({
                     'startIndex': currentStartIndex,
@@ -60,7 +61,6 @@ var Cat = (function () {
                 });
             }
         });
-        // console.log('aaa', blockJoined)
 
         blockJoined.forEach(item => {
             tokens[item.startIndex] = item.mergedString;
@@ -79,15 +79,17 @@ var Cat = (function () {
         blockJoined = [];
 
         tokens.forEach((item, index) => {
+            let started = false;
             if(item.startsWith('\'') || item.startsWith('"')) {
                 currentStartIndex = index;
                 currentLastIndex = 9999999999;
                 block[currentStartIndex] = [];
+                started = true;
             }
             if(index >= currentStartIndex && index <= currentLastIndex) {
                 block[currentStartIndex].push(item);
             }
-            if(item.endsWith('\'') || item.endsWith('"')) {
+            if(!started && (item.endsWith('\'') || item.endsWith('"'))) {
                 currentLastIndex = index;
                 blockJoined.push({
                     'startIndex': currentStartIndex,
@@ -166,10 +168,6 @@ var Cat = (function () {
 
         return tokens
     }
-
-    let string1 = 'cat() + 1 + ` ${cat()}`';
-    tokenize(string1);
-    // console.log(string1 +'\n', tokenize(string1))
 
     class Cat {
         constructor(paramsObject) {

@@ -8,8 +8,8 @@ new Cat({
         items: []
     },
     methods: {
-        sayHello() {
-            console.log(this.cat2())
+        sayHello(event) {
+            console.log(event, this.cat2())
         },
         cat() {
             return 99

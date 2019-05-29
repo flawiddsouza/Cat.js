@@ -15,7 +15,7 @@ let separators = [
     '<'
 ]
 
-let keywords = ['if', 'else', 'else if', 'true', 'false']
+let keywords = ['if', 'else', 'else if', 'true', 'false', 'alert', 'console.log', '$event']
 
 function tokenize(string) {
     let characters = string.split('')

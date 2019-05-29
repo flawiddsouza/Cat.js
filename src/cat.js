@@ -35,6 +35,9 @@ export default class Cat {
             // handle html > data-if, data-else-if, data-else
             this.handleConditionalElements()
 
+            // handle html data-on-{event}
+            this.handleEventListeners()
+
             // handle mounted()
             if(paramsObject.mounted) {
                 paramsObject.mounted.call(this)
@@ -186,6 +189,40 @@ export default class Cat {
                     this.showElement(conditionals.else)
                 }
             }
+        })
+    }
+
+    handleEventListeners() {
+        let eventListeners = this.rootElement.querySelectorAll(`
+            [data-on-click],
+            [data-on-input],
+            [data-on-blur],
+            [data-on-focus],
+            [data-on-mouseover],
+            [data-on-mousedown],
+            [data-on-mouseup],
+            [data-on-keyup],
+            [data-on-keydown]
+        `)
+
+        eventListeners.forEach(eventListener => {
+            let event = Object.keys(eventListener.dataset)[0].replace('on', '').toLowerCase()
+            let eventListenerExpression = Object.values(eventListener.dataset)[0]
+            eventListener.addEventListener(event, ($event) => {
+                let tokens  = tokenize(eventListenerExpression)
+
+                let parsedExpression = ''
+
+                tokens.forEach(token => {
+                    if(token.type === 'Variable') {
+                        parsedExpression += 'this.' + token.value
+                    } else {
+                        parsedExpression += token.value
+                    }
+                })
+
+                eval(parsedExpression)
+            })
         })
     }
 }

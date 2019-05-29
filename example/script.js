@@ -1,5 +1,5 @@
-function cat(){
-    return 'hey'
+function cat2(){
+    return 'Hello!'
 }
 
 new Cat({
@@ -9,11 +9,12 @@ new Cat({
     },
     methods: {
         sayHello() {
-            alert('hello')
+            console.log(this.cat2())
         },
         cat() {
             return 99
-        }
+        },
+        cat2
     },
     created() {
         for(let i=0; i<=20; i++) {
@@ -23,6 +24,6 @@ new Cat({
             })
         }
 
-        // this.sayHello()
+        this.sayHello()
     }
 })

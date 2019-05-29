@@ -11,10 +11,12 @@ var Cat = (function () {
         '*',
         '=',
         '(',
-        ')'
+        ')',
+        '>',
+        '<'
     ];
 
-    let keywords = ['if', 'else', 'else if'];
+    let keywords = ['if', 'else', 'else if', 'true', 'false'];
 
     function tokenize(string) {
         let characters = string.split('');
@@ -39,7 +41,8 @@ var Cat = (function () {
         let currentLastIndex;
 
         // start - handle ` strings
-        tokens.forEach((item, index) => {
+        // console.log(tokens) // till here we get all `` tokens
+        tokens.forEach((item, index) => { // missing `` items caused by this block
             if(item.startsWith('`')) {
                 currentStartIndex = index;
                 currentLastIndex = 9999999999;
@@ -57,6 +60,7 @@ var Cat = (function () {
                 });
             }
         });
+        // console.log('aaa', blockJoined)
 
         blockJoined.forEach(item => {
             tokens[item.startIndex] = item.mergedString;
@@ -163,7 +167,8 @@ var Cat = (function () {
         return tokens
     }
 
-    // let string1 = 'cat() + 1 + ` ${cat()}`'
+    let string1 = 'cat() + 1 + ` ${cat()}`';
+    tokenize(string1);
     // console.log(string1 +'\n', tokenize(string1))
 
     class Cat {
@@ -195,6 +200,12 @@ var Cat = (function () {
                 // handle html > data-loop
                 this.handleLoopElements();
 
+                // handle html > {{ }}
+                this.handleEchoElements();
+
+                // handle html > data-if, data-else-if, data-else
+                this.handleConditionalElements();
+
                 // handle mounted()
                 if(paramsObject.mounted) {
                     paramsObject.mounted.call(this);
@@ -208,35 +219,46 @@ var Cat = (function () {
             element.style.display = 'none';
         }
 
-        handleEcho(expression, element, data=null) {
+        showElement(element) {
+            element.style.display = '';
+        }
+
+        getParsedExpression(unparsedExpression, element) {
+            let tokens  = tokenize(unparsedExpression);
+
+            let newString = '';
+
+            tokens.forEach(token => {
+                if(token.type === 'Variable') {
+                    if(element.loopItem && element.loopItem.hasOwnProperty(token.value)) {
+                        newString += 'element.loopItem.' + token.value;
+                    } else {
+                        if(!this.hasOwnProperty(token.value)) {
+                            console.error(`%c${token.value}`, 'font-weight: bold', 'has not been on the instance in ', unparsedExpression);
+                            element.parentElement.style.border = '2px solid red';
+                            element.parentElement.style.color = 'red';
+                            element.parentElement.insertAdjacentHTML('afterbegin', '<b>Error: </b>');
+                        }
+                        newString += 'this.' + token.value;
+                    }
+                } else {
+                    newString += token.value;
+                }
+            });
+
+            return eval(newString)
+        }
+
+        handleEcho(unparsedExpression, element) {
             let regex = /{{ *(.*?) *}}/g;
-            let matches = [...expression.matchAll(regex)].map(item => item[1]);
+            let matches = [...unparsedExpression.matchAll(regex)].map(item => item[1]);
 
             matches.forEach(match => {
-                let tokens  = tokenize(match);
-
-                let newString = '';
-
-                console.log(tokens);
-                tokens.forEach(token => {
-                    if(token.type === 'Variable') {
-                        if(data.hasOwnProperty(token.value)) {
-                            newString += 'data.' + token.value;
-                        } else if(this.hasOwnProperty(token.value)) {
-                            newString += 'this.' + token.value;
-                        } else {
-                            newString += token.value;
-                        }
-                    } else {
-                        newString += token.value;
-                    }
-                });
-
-                let out = eval(newString);
+                let out = this.getParsedExpression(match, element);
 
                 let escapedMatch = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 let regex = new RegExp(`{{.*?${escapedMatch}.*?}}`);
-                element.innerHTML = element.innerHTML.replace(regex, out);
+                element.nodeValue = element.nodeValue.replace(regex, out);
             });
         }
 
@@ -254,7 +276,7 @@ var Cat = (function () {
                     let loopElementCopy = loopElement.cloneNode(true);
                     delete loopElementCopy.dataset.loop;
 
-                    this.handleEcho(loopElement.innerHTML, loopElementCopy, item);
+                    loopElementCopy.childNodes[0].loopItem = item;
 
                     parent.appendChild(loopElementCopy);
 
@@ -262,8 +284,79 @@ var Cat = (function () {
 
                 parent.insertAdjacentHTML('beforeend', html);
 
+                // loopElement.remove()
                 this.hideElement(loopElement);
 
+            });
+        }
+
+        textNodesUnder(element, match=null) {
+            let n;
+            let textNodes = [];
+            let walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            while(n=walk.nextNode()) {
+                textNodes.push(n);
+            }
+            if(match) {
+                textNodes = textNodes.filter(textNode => textNode.nodeValue.match(match));
+            }
+            return textNodes
+        }
+
+        handleEchoElements() {
+            let textNodes = this.textNodesUnder(this.rootElement, /{{.*?}}/g);
+            textNodes = textNodes.filter(textNode => !textNode.parentElement.dataset.loop); // exclude loop elements
+            textNodes.forEach(textNode => {
+                this.handleEcho(textNode.nodeValue, textNode);
+            });
+        }
+
+        handleConditionalElements() {
+            let ifConditionalElements = this.rootElement.querySelectorAll('[data-if]');
+
+            ifConditionalElements.forEach(ifConditionalElement => {
+                let conditionals = {};
+
+                conditionals['if'] = ifConditionalElement;
+                this.hideElement(ifConditionalElement);
+                conditionals['elseIf'] = [];
+
+                let nextElementSibling =  ifConditionalElement.nextElementSibling;
+
+                while(nextElementSibling) {
+                    if(nextElementSibling.dataset.hasOwnProperty('elseIf')) {
+                        this.hideElement(nextElementSibling);
+                        conditionals['elseIf'].push(nextElementSibling);
+                        nextElementSibling = nextElementSibling.nextElementSibling;
+                    } else if(nextElementSibling.dataset.hasOwnProperty('else')) {
+                        this.hideElement(nextElementSibling);
+                        conditionals['else'] = nextElementSibling;
+                        nextElementSibling = null;
+                    } else {
+                        nextElementSibling = null;
+                    }
+                }
+
+                let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if);
+                parsedIfCondition = eval(parsedIfCondition);
+
+                if(parsedIfCondition) {
+                    this.showElement(conditionals.if);
+                } else {
+                    let conditionMet = false;
+
+                    conditionals.elseIf.forEach(elseIf => {
+                        if(!conditionMet && eval(elseIf.dataset.elseIf)) {
+                            conditionMet = true;
+                            this.showElement(elseIf);
+                        }
+                    });
+
+                    if(!conditionMet && conditionals.else) {
+                        conditionMet =  true;
+                        this.showElement(conditionals.else);
+                    }
+                }
             });
         }
     }

@@ -10,10 +10,12 @@ let separators = [
     '*',
     '=',
     '(',
-    ')'
+    ')',
+    '>',
+    '<'
 ]
 
-let keywords = ['if', 'else', 'else if']
+let keywords = ['if', 'else', 'else if', 'true', 'false']
 
 function tokenize(string) {
     let characters = string.split('')
@@ -38,7 +40,8 @@ function tokenize(string) {
     let currentLastIndex
 
     // start - handle ` strings
-    tokens.forEach((item, index) => {
+    // console.log(tokens) // till here we get all `` tokens
+    tokens.forEach((item, index) => { // missing `` items caused by this block
         if(item.startsWith('`')) {
             currentStartIndex = index
             currentLastIndex = 9999999999
@@ -56,6 +59,7 @@ function tokenize(string) {
             })
         }
     })
+    // console.log('aaa', blockJoined)
 
     blockJoined.forEach(item => {
         tokens[item.startIndex] = item.mergedString
@@ -164,5 +168,6 @@ function handleInterpolatedString(string) {
 
 export default tokenize
 
-// let string1 = 'cat() + 1 + ` ${cat()}`'
+let string1 = 'cat() + 1 + ` ${cat()}`'
+tokenize(string1)
 // console.log(string1 +'\n', tokenize(string1))

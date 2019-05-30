@@ -274,9 +274,8 @@ class Cat {
 
         loopElements.forEach(loopElement => {
 
-            let parent = loopElement.parentElement;
-
-            let html = '';
+            let fragment = document.createDocumentFragment();
+            let insertedElement = null;
 
             this[loopElement.dataset.loop].forEach(item => {
 
@@ -285,13 +284,16 @@ class Cat {
 
                 loopElementCopy.childNodes[0].loopItem = item;
 
-                parent.appendChild(loopElementCopy);
+                if(!insertedElement) {
+                    loopElement.insertAdjacentElement('afterend', loopElementCopy);
+                } else {
+                    insertedElement.insertAdjacentElement('afterend', loopElementCopy);
+                }
+
+                insertedElement = loopElementCopy;
 
             });
 
-            parent.insertAdjacentHTML('beforeend', html);
-
-            // loopElement.remove()
             this.hideElement(loopElement);
 
         });

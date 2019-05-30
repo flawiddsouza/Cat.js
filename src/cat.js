@@ -3,6 +3,11 @@ import tokenize from './tokenizer'
 export default class Cat {
     constructor(paramsObject) {
 
+        if(paramsObject.hasOwnProperty('name')) {
+            this.handleComponent(paramsObject)
+            return
+        }
+
         // handle data
         if(paramsObject.data) {
             for(let key in paramsObject.data) {
@@ -24,7 +29,11 @@ export default class Cat {
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            this.rootElement = document.querySelector(paramsObject.el)
+            if(typeof paramsObject.el === 'string') {
+                this.rootElement = document.querySelector(paramsObject.el)
+            } else {
+                this.rootElement = paramsObject.el
+            }
 
             // handle html > data-loop
             this.handleLoopElements()
@@ -223,6 +232,26 @@ export default class Cat {
 
                 eval(parsedExpression)
             })
+        })
+    }
+
+    handleComponent(paramsObject) {
+        customElements.define(paramsObject.name, class extends HTMLElement {
+            constructor() {
+                super()
+                let shadowElement = this.attachShadow({ mode: 'open' })
+                shadowElement.innerHTML = paramsObject.template
+            }
+
+            connectedCallback() {
+                new Cat({
+                    el: this.shadowRoot,
+                    data: paramsObject.data,
+                    methods: paramsObject.methods,
+                    created: paramsObject.created,
+                    mounted: paramsObject.mounted
+                })
+            }
         })
     }
 }

@@ -3,6 +3,21 @@ function cat2(){
 }
 
 new Cat({
+    name: 'hello-world',
+    template: `
+        <div>{{ message }}<br><button data-on-click="consoleLogMessage()">consoleLogMessage</button></div>
+    `,
+    data: {
+        message: 'Hello World'
+    },
+    methods: {
+        consoleLogMessage() {
+            console.log(this.message)
+        }
+    }
+})
+
+new Cat({
     el: '#container',
     data: {
         items: []

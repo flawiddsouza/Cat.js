@@ -179,23 +179,29 @@ class Cat {
             return
         }
 
+        this.parsedExpressions = {};
+        this.dataBindings = {};
+
+        this.proxy = new Proxy(this, this.handleDataBindings());
+
         // handle data
         if(paramsObject.data) {
             for(let key in paramsObject.data) {
                 this[key] = paramsObject.data[key];
+                this.dataBindings[key] = [];
             }
         }
 
         // handle methods
         if(paramsObject.methods) {
             for(let key in paramsObject.methods) {
-                this[key] = paramsObject.methods[key];
+                this[key] = (...args) => paramsObject.methods[key].call(this.proxy, ...args);
             }
         }
 
         // handle created()
         if(paramsObject.created) {
-            paramsObject.created.call(this);
+            paramsObject.created.call(this.proxy);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -218,11 +224,13 @@ class Cat {
             // handle html data-on-{event}
             this.handleEventListeners();
 
+            // handle html > data-value
+            this.handleDataValueElements();
+
             // handle mounted()
             if(paramsObject.mounted) {
-                paramsObject.mounted.call(this);
+                paramsObject.mounted.call(this.proxy);
             }
-
         });
 
     }
@@ -236,34 +244,50 @@ class Cat {
     }
 
     getParsedExpression(unparsedExpression, element) {
-        let tokens  = tokenize(unparsedExpression);
+        // if(!this.parsedExpressions.hasOwnProperty(unparsedExpression)) { // removing this reduces performance but enables dataBindings
+            let tokens  = tokenize(unparsedExpression);
 
-        let newString = '';
+            let newString = '';
 
-        tokens.forEach(token => {
-            if(token.type === 'Variable') {
-                if(element.loopItem && element.loopItem.hasOwnProperty(token.value)) {
-                    newString += 'element.loopItem.' + token.value;
-                } else {
-                    if(!this.hasOwnProperty(token.value)) {
-                        console.error(`%c${token.value}`, 'font-weight: bold', 'has not been on the instance in ', unparsedExpression);
-                        element.parentElement.style.border = '2px solid red';
-                        element.parentElement.style.color = 'red';
-                        element.parentElement.insertAdjacentHTML('afterbegin', '<b>Error: </b>');
+            tokens.forEach(token => {
+                if(token.type === 'Variable') {
+                    if(element.loopItem && element.loopItem.hasOwnProperty(token.value)) {
+                        newString += 'element.loopItem.' + token.value;
+                    } else {
+                        if(!this.hasOwnProperty(token.value)) {
+                            console.error(`%c${token.value}`, 'font-weight: bold', 'has not been on the instance in ', unparsedExpression);
+                            element.parentElement.style.border = '2px solid red';
+                            element.parentElement.style.color = 'red';
+                            element.parentElement.insertAdjacentHTML('afterbegin', '<b>Error: </b>');
+                        } else {
+                            if(this.dataBindings.hasOwnProperty(token.value) && !this.dataBindings[token.value].includes(element)) {
+                                this.dataBindings[token.value].push(element);
+                            }
+                        }
+                        newString += 'this.proxy.' + token.value;
                     }
-                    newString += 'this.' + token.value;
+                } else {
+                    newString += token.value;
                 }
-            } else {
-                newString += token.value;
-            }
-        });
+            });
 
-        return eval(newString)
+            this.parsedExpressions[unparsedExpression] = newString;
+        // }
+
+        let result = new Function('element', 'return ' + this.parsedExpressions[unparsedExpression]).call(this, element);
+
+        return result
     }
 
     handleEcho(unparsedExpression, element) {
         let regex = /{{ *(.*?) *}}/g;
         let matches = [...unparsedExpression.matchAll(regex)].map(item => item[1]);
+
+        if(!element.parentElement.hasOwnProperty('unparsedExpression')) {
+            element.parentElement.unparsedExpression = unparsedExpression;
+        } else {
+            element.nodeValue = element.parentElement.unparsedExpression;
+        }
 
         matches.forEach(match => {
             let out = this.getParsedExpression(match, element);
@@ -279,7 +303,6 @@ class Cat {
 
         loopElements.forEach(loopElement => {
 
-            let fragment = document.createDocumentFragment();
             let insertedElement = null;
 
             this[loopElement.dataset.loop].forEach(item => {
@@ -397,7 +420,7 @@ class Cat {
 
                 tokens.forEach(token => {
                     if(token.type === 'Variable') {
-                        parsedExpression += 'this.' + token.value;
+                        parsedExpression += 'this.proxy.' + token.value;
                     } else {
                         parsedExpression += token.value;
                     }
@@ -425,6 +448,43 @@ class Cat {
                     mounted: paramsObject.mounted
                 });
             }
+        });
+    }
+
+    handleDataBindings() {
+        let _this = this;
+        return {
+            // get: function(target, prop, receiver) {
+            //     return Reflect.get(...arguments)
+            // },
+            set(obj, prop, value) {
+                Reflect.set(...arguments);
+                if(_this.dataBindings.hasOwnProperty(prop)) {
+                    _this.dataBindings[prop].forEach(elementToRefresh => {
+                        if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
+                            _this.handleDataValueElement(elementToRefresh);
+                        } else {
+                            _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
+                        }
+                    });
+                }
+                return true
+            }
+        }
+    }
+
+    static component(paramsObject) {
+        new Cat(paramsObject);
+    }
+
+    handleDataValueElement(element) {
+        element.value = this.getParsedExpression(element.dataset.value, element);
+    }
+
+    handleDataValueElements() {
+        let inputDataValueElements = this.rootElement.querySelectorAll('input[data-value]');
+        inputDataValueElements.forEach(inputDataValueElement => {
+            this.handleDataValueElement(inputDataValueElement);
         });
     }
 }

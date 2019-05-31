@@ -2,25 +2,15 @@ function cat2(){
     return 'Hello!'
 }
 
-new Cat({
-    name: 'hello-world',
-    template: `
-        <div>{{ message }}<br><button data-on-click="consoleLogMessage()">consoleLogMessage</button></div>
-    `,
-    data: {
-        message: 'Hello World'
-    },
-    methods: {
-        consoleLogMessage() {
-            console.log(this.message)
-        }
-    }
-})
+Cat.component(HelloWorld)
 
 new Cat({
     el: '#container',
     data: {
-        items: []
+        items: [],
+        test: 'aaa',
+        counter: 0,
+        inputTest: 'Test'
     },
     methods: {
         sayHello(event) {
@@ -29,7 +19,10 @@ new Cat({
         cat() {
             return 99
         },
-        cat2
+        cat2,
+        counterAdd1() {
+            this.counter++
+        }
     },
     created() {
         for(let i=0; i<=20; i++) {

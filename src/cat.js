@@ -127,32 +127,34 @@ export default class Cat {
         })
     }
 
+    handleLoopElement(loopElement) {
+        let insertedElement = null
+
+        this[loopElement.dataset.loop].forEach(item => {
+
+            let loopElementCopy = loopElement.cloneNode(true)
+            delete loopElementCopy.dataset.loop
+
+            loopElementCopy.childNodes[0].loopItem = item
+
+            if(!insertedElement) {
+                loopElement.insertAdjacentElement('afterend', loopElementCopy)
+            } else {
+                insertedElement.insertAdjacentElement('afterend', loopElementCopy)
+            }
+
+            insertedElement = loopElementCopy
+
+        })
+
+        this.hideElement(loopElement)
+    }
+
     handleLoopElements() {
         var loopElements = Array.from(this.rootElement.querySelectorAll('[data-loop]'))
 
         loopElements.forEach(loopElement => {
-
-            let insertedElement = null
-
-            this[loopElement.dataset.loop].forEach(item => {
-
-                let loopElementCopy = loopElement.cloneNode(true)
-                delete loopElementCopy.dataset.loop
-
-                loopElementCopy.childNodes[0].loopItem = item
-
-                if(!insertedElement) {
-                    loopElement.insertAdjacentElement('afterend', loopElementCopy)
-                } else {
-                    insertedElement.insertAdjacentElement('afterend', loopElementCopy)
-                }
-
-                insertedElement = loopElementCopy
-
-            })
-
-            this.hideElement(loopElement)
-
+            this.handleLoopElement(loopElement)
         })
     }
 
@@ -177,52 +179,56 @@ export default class Cat {
         })
     }
 
+    handleConditionalElement(ifConditionalElement) {
+        let conditionals = {}
+
+        conditionals['if'] = ifConditionalElement
+        this.hideElement(ifConditionalElement)
+        conditionals['elseIf'] = []
+
+        let nextElementSibling =  ifConditionalElement.nextElementSibling
+
+        while(nextElementSibling) {
+            if(nextElementSibling.dataset.hasOwnProperty('elseIf')) {
+                this.hideElement(nextElementSibling)
+                conditionals['elseIf'].push(nextElementSibling)
+                nextElementSibling = nextElementSibling.nextElementSibling
+            } else if(nextElementSibling.dataset.hasOwnProperty('else')) {
+                this.hideElement(nextElementSibling)
+                conditionals['else'] = nextElementSibling
+                nextElementSibling = null
+            } else {
+                nextElementSibling = null
+            }
+        }
+
+        let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if)
+        parsedIfCondition = eval(parsedIfCondition)
+
+        if(parsedIfCondition) {
+            this.showElement(conditionals.if)
+        } else {
+            let conditionMet = false
+
+            conditionals.elseIf.forEach(elseIf => {
+                if(!conditionMet && eval(elseIf.dataset.elseIf)) {
+                    conditionMet = true
+                    this.showElement(elseIf)
+                }
+            })
+
+            if(!conditionMet && conditionals.else) {
+                conditionMet =  true
+                this.showElement(conditionals.else)
+            }
+        }
+    }
+
     handleConditionalElements() {
         let ifConditionalElements = this.rootElement.querySelectorAll('[data-if]')
 
         ifConditionalElements.forEach(ifConditionalElement => {
-            let conditionals = {}
-
-            conditionals['if'] = ifConditionalElement
-            this.hideElement(ifConditionalElement)
-            conditionals['elseIf'] = []
-
-            let nextElementSibling =  ifConditionalElement.nextElementSibling
-
-            while(nextElementSibling) {
-                if(nextElementSibling.dataset.hasOwnProperty('elseIf')) {
-                    this.hideElement(nextElementSibling)
-                    conditionals['elseIf'].push(nextElementSibling)
-                    nextElementSibling = nextElementSibling.nextElementSibling
-                } else if(nextElementSibling.dataset.hasOwnProperty('else')) {
-                    this.hideElement(nextElementSibling)
-                    conditionals['else'] = nextElementSibling
-                    nextElementSibling = null
-                } else {
-                    nextElementSibling = null
-                }
-            }
-
-            let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if)
-            parsedIfCondition = eval(parsedIfCondition)
-
-            if(parsedIfCondition) {
-                this.showElement(conditionals.if)
-            } else {
-                let conditionMet = false
-
-                conditionals.elseIf.forEach(elseIf => {
-                    if(!conditionMet && eval(elseIf.dataset.elseIf)) {
-                        conditionMet = true
-                        this.showElement(elseIf)
-                    }
-                })
-
-                if(!conditionMet && conditionals.else) {
-                    conditionMet =  true
-                    this.showElement(conditionals.else)
-                }
-            }
+            this.handleConditionalElement(ifConditionalElement)
         })
     }
 

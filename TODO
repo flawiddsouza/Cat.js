@@ -1,2 +1,3 @@
-- Implement data-model, to work like v-model from Vue
 - Implement refresh of data-loop on array modifications - push, pop, splice, replaced - plus, perform only the patches instead of refreshing all elements belonging to a data-loop
+- refresh data-if on data changes
+- Implement data-model, to work like v-model from Vue

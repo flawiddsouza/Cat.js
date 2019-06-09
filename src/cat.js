@@ -250,7 +250,8 @@ export default class Cat {
             [data-on-mousedown],
             [data-on-mouseup],
             [data-on-keyup],
-            [data-on-keydown]
+            [data-on-keydown],
+            [data-on-submit]
         `)
 
         eventListeners.forEach(eventListener => {

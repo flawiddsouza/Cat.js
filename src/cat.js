@@ -135,7 +135,14 @@ export default class Cat {
             let loopElementCopy = loopElement.cloneNode(true)
             delete loopElementCopy.dataset.loop
 
-            loopElementCopy.childNodes[0].loopItem = item
+            if(loopElementCopy.childNodes.length === 1) {
+                loopElementCopy.childNodes[0].loopItem = item
+            } else if(loopElementCopy.childNodes.length > 1) {
+                let childNodes = Array.from(loopElementCopy.childNodes).filter(element => element.nodeName !== '#text')
+                childNodes.forEach(childNode => {
+                    childNode.childNodes[0].loopItem = item
+                })
+            }
 
             if(!insertedElement) {
                 loopElement.insertAdjacentElement('afterend', loopElementCopy)
@@ -174,6 +181,7 @@ export default class Cat {
     handleEchoElements() {
         let textNodes = this.textNodesUnder(this.rootElement, /{{.*?}}/g)
         textNodes = textNodes.filter(textNode => !textNode.parentElement.dataset.loop) // exclude loop elements
+        textNodes = textNodes.filter(textNode => !textNode.parentElement.parentElement.dataset.loop) // exclude loop elements that have nested elements
         textNodes.forEach(textNode => {
             this.handleEcho(textNode.nodeValue, textNode)
         })

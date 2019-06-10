@@ -304,6 +304,17 @@ var Cat = (function () {
         handleLoopElement(loopElement) {
             let insertedElement = null;
 
+            if(this.dataBindings.hasOwnProperty(loopElement.dataset.loop) && !this.dataBindings[loopElement.dataset.loop].includes(loopElement)) {
+                this.dataBindings[loopElement.dataset.loop].push(loopElement);
+            }
+
+            if(!loopElement.hasOwnProperty('loopItems')) {
+                loopElement.loopItems = [];
+            } else {
+                loopElement.loopItems.forEach(loopItem => loopItem.remove());
+                this.showElement(loopElement);
+            }
+
             this[loopElement.dataset.loop].forEach(item => {
 
                 let loopElementCopy = loopElement.cloneNode(true);
@@ -323,6 +334,8 @@ var Cat = (function () {
                 } else {
                     insertedElement.insertAdjacentElement('afterend', loopElementCopy);
                 }
+
+                loopElement.loopItems.push(loopElementCopy);
 
                 insertedElement = loopElementCopy;
 
@@ -481,6 +494,9 @@ var Cat = (function () {
                         _this.dataBindings[prop].forEach(elementToRefresh => {
                             if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                                 _this.handleDataValueElement(elementToRefresh);
+                            } else if(elementToRefresh.dataset.hasOwnProperty('loop')) {
+                                _this.handleLoopElement(elementToRefresh);
+                                _this.handleEchoElements(); // refreshes every echo element in the page - TODO refresh only the echo elements inside the loop element items
                             } else {
                                 _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
                             }

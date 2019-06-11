@@ -427,8 +427,12 @@ var Cat = (function () {
             });
         }
 
-        handleEventListeners() {
-            let eventListeners = this.rootElement.querySelectorAll(`
+        handleEventListeners(element=null) {
+            if(!element) {
+                element = this.rootElement;
+            }
+
+            let eventListeners = element.querySelectorAll(`
             [data-on-click],
             [data-on-input],
             [data-on-blur],
@@ -451,7 +455,11 @@ var Cat = (function () {
 
                     tokens.forEach(token => {
                         if(token.type === 'Variable') {
-                            parsedExpression += 'this.proxy.' + token.value;
+                            if(eventListener.loopItem && eventListener.loopItem.hasOwnProperty(token.value)) {
+                                parsedExpression += 'eventListener.loopItem.' + token.value;
+                            } else {
+                                parsedExpression += 'this.proxy.' + token.value;
+                            }
                         } else {
                             parsedExpression += token.value;
                         }
@@ -497,6 +505,9 @@ var Cat = (function () {
                             } else if(elementToRefresh.dataset.hasOwnProperty('loop')) {
                                 _this.handleLoopElement(elementToRefresh);
                                 _this.handleEchoElements(); // refreshes every echo element in the page - TODO refresh only the echo elements inside the loop element items
+                                elementToRefresh.loopItems.forEach(loopItem => {
+                                    _this.handleEventListeners(loopItem);
+                                });
                             } else {
                                 _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
                             }

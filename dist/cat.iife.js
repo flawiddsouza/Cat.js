@@ -511,6 +511,8 @@ var Cat = (function () {
                                     _this.handleEchoElements(loopItem);
                                     _this.handleEventListeners(loopItem);
                                 });
+                            } else if(elementToRefresh.dataset.hasOwnProperty('if')) {
+                                _this.handleConditionalElement(elementToRefresh);
                             } else {
                                 _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
                             }

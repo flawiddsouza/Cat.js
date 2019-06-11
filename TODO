@@ -6,3 +6,6 @@
     attaches the event listener but
     <input type="text" required data-value="addRating" data-on-input="addRating = $event.target.value">
     doesn't. Why does data-on-{event} need to come before data-value? Doesn't make sense. One is not dependent on the other.
+- Similar issue:
+    <div class="modal-background" data-on-click="console.log($event)" data-if="showComments"></div> works
+    but <div data-if="showComments" class="modal-background" data-on-click="console.log($event)"></div> doesn't :/

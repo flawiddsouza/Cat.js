@@ -529,7 +529,7 @@ class Cat {
     }
 
     handleDataValueElements() {
-        let inputDataValueElements = this.rootElement.querySelectorAll('input[data-value]');
+        let inputDataValueElements = this.rootElement.querySelectorAll('input[data-value], textarea[data-value]');
         inputDataValueElements.forEach(inputDataValueElement => {
             this.handleDataValueElement(inputDataValueElement);
         });

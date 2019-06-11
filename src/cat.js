@@ -146,14 +146,11 @@ export default class Cat {
             let loopElementCopy = loopElement.cloneNode(true)
             delete loopElementCopy.dataset.loop
 
-            if(loopElementCopy.childNodes.length === 1) {
-                loopElementCopy.childNodes[0].loopItem = item
-            } else if(loopElementCopy.childNodes.length > 1) {
-                let childNodes = Array.from(loopElementCopy.childNodes).filter(element => element.nodeName !== '#text')
-                childNodes.forEach(childNode => {
-                    childNode.childNodes[0].loopItem = item
-                })
-            }
+            let textNodesUnderElementCopy = this.textNodesUnder(loopElementCopy)
+            textNodesUnderElementCopy.forEach(textNode => {
+                textNode.loopItem = item
+                textNode.parentElement.loopItem = item
+            })
 
             if(!insertedElement) {
                 loopElement.insertAdjacentElement('afterend', loopElementCopy)
@@ -191,10 +188,14 @@ export default class Cat {
         return textNodes
     }
 
-    handleEchoElements() {
-        let textNodes = this.textNodesUnder(this.rootElement, /{{.*?}}/g)
+    handleEchoElements(element=null) {
+        if(!element) {
+            element = this.rootElement
+        }
+        let textNodes = this.textNodesUnder(element, /{{.*?}}/g)
         textNodes = textNodes.filter(textNode => !textNode.parentElement.dataset.loop) // exclude loop elements
         textNodes = textNodes.filter(textNode => !textNode.parentElement.parentElement.dataset.loop) // exclude loop elements that have nested elements
+        textNodes = textNodes.filter(textNode => !textNode.parentElement.parentElement.parentElement.dataset.loop) // exclude loop elements that have nested elements inside nested elements
         textNodes.forEach(textNode => {
             this.handleEcho(textNode.nodeValue, textNode)
         })
@@ -283,8 +284,10 @@ export default class Cat {
                     if(token.type === 'Variable') {
                         if(eventListener.loopItem && eventListener.loopItem.hasOwnProperty(token.value)) {
                             parsedExpression += 'eventListener.loopItem.' + token.value
-                        } else {
+                        } else if(this.hasOwnProperty(token.value)) {
                             parsedExpression += 'this.proxy.' + token.value
+                        } else {
+                            parsedExpression += token.value
                         }
                     } else {
                         parsedExpression += token.value
@@ -330,8 +333,8 @@ export default class Cat {
                             _this.handleDataValueElement(elementToRefresh)
                         } else if(elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh)
-                            _this.handleEchoElements() // refreshes every echo element in the page - TODO refresh only the echo elements inside the loop element items
                             elementToRefresh.loopItems.forEach(loopItem => {
+                                _this.handleEchoElements(loopItem)
                                 _this.handleEventListeners(loopItem)
                             })
                         } else {

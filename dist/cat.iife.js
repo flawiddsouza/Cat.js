@@ -254,17 +254,18 @@ var Cat = (function () {
 
                 tokens.forEach(token => {
                     if(token.type === 'Variable') {
-                        if(element.loopItem && element.loopItem.hasOwnProperty(token.value)) {
+                        let tokenValue = token.value.split('.')[0];
+                        if(element.loopItem && element.loopItem.hasOwnProperty(tokenValue)) {
                             newString += 'element.loopItem.' + token.value;
                         } else {
-                            if(!this.hasOwnProperty(token.value)) {
-                                console.error(`%c${token.value}`, 'font-weight: bold', 'has not been on the instance in ', unparsedExpression);
+                            if(!this.hasOwnProperty(tokenValue)) {
+                                console.error(`%c${tokenValue}`, 'font-weight: bold', 'has not been on the instance in ', unparsedExpression);
                                 element.parentElement.style.border = '2px solid red';
                                 element.parentElement.style.color = 'red';
                                 element.parentElement.insertAdjacentHTML('afterbegin', '<b>Error: </b>');
                             } else {
-                                if(this.dataBindings.hasOwnProperty(token.value) && !this.dataBindings[token.value].includes(element)) {
-                                    this.dataBindings[token.value].push(element);
+                                if(this.dataBindings.hasOwnProperty(tokenValue) && !this.dataBindings[tokenValue].includes(element)) {
+                                    this.dataBindings[tokenValue].push(element);
                                 }
                             }
                             newString += 'this.proxy.' + token.value;

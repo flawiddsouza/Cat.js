@@ -20,7 +20,10 @@ let keywords = [
     'if', 'else', 'else if', 'true', 'false', 'alert', 'console.log',
     '$event',
     '$event.target',
-    '$event.target.value'
+    '$event.target.value',
+    'null',
+    '||',
+    '&&'
 ]
 
 function tokenize(string) {

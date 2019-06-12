@@ -454,9 +454,10 @@ class Cat {
 
                 tokens.forEach(token => {
                     if(token.type === 'Variable') {
-                        if(eventListener.loopItem && eventListener.loopItem.hasOwnProperty(token.value)) {
+                        let tokenValue = token.value.split('.')[0];
+                        if(eventListener.loopItem && eventListener.loopItem.hasOwnProperty(tokenValue)) {
                             parsedExpression += 'eventListener.loopItem.' + token.value;
-                        } else if(this.hasOwnProperty(token.value)) {
+                        } else if(this.hasOwnProperty(tokenValue)) {
                             parsedExpression += 'this.proxy.' + token.value;
                         } else {
                             parsedExpression += token.value;
@@ -494,9 +495,13 @@ class Cat {
     handleDataBindings() {
         let _this = this;
         return {
-            // get: function(target, prop, receiver) {
-            //     return Reflect.get(...arguments)
-            // },
+            get(target, prop, receiver) {
+                if(typeof target[prop] === 'object' && target[prop] !== null) {
+                    return new Proxy(target[prop], _this.handleDataBindings)
+                } else {
+                    return target[prop]
+                }
+            },
             set(obj, prop, value) {
                 Reflect.set(...arguments);
                 if(_this.dataBindings.hasOwnProperty(prop)) {

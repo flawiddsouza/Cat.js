@@ -151,6 +151,9 @@ export default class Cat {
             textNodesUnderElementCopy.forEach(textNode => {
                 textNode.loopItem = item
                 textNode.parentElement.loopItem = item
+                if(textNode.parentElement.parentElement && !textNode.parentElement.parentElement.dataset.hasOwnProperty('data-loop')) {
+                    textNode.parentElement.parentElement.loopItem = item // handles attaching loopItem to upper elements wrapping the textNodes - TODO while loop to attach loopItem to all parentElement of parentElement until that parentElement is a data-loop
+                }
             })
 
             if(!insertedElement) {

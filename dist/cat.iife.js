@@ -381,6 +381,10 @@ var Cat = (function () {
         }
 
         handleConditionalElement(ifConditionalElement) {
+            if(ifConditionalElement.closest('[data-loop')) { // exclude data-loop and the elements inside it
+                return
+            }
+
             let conditionals = {};
 
             conditionals['if'] = ifConditionalElement;
@@ -425,8 +429,11 @@ var Cat = (function () {
             }
         }
 
-        handleConditionalElements() {
-            let ifConditionalElements = this.rootElement.querySelectorAll('[data-if]');
+        handleConditionalElements(element=null) {
+            if(!element) {
+                element = this.rootElement;
+            }
+            let ifConditionalElements = element.querySelectorAll('[data-if]');
 
             ifConditionalElements.forEach(ifConditionalElement => {
                 this.handleConditionalElement(ifConditionalElement);
@@ -520,6 +527,7 @@ var Cat = (function () {
                                 elementToRefresh.loopItems.forEach(loopItem => {
                                     _this.handleEchoElements(loopItem);
                                     _this.handleEventListeners(loopItem);
+                                    _this.handleConditionalElements(loopItem);
                                 });
                             } else if(elementToRefresh.dataset.hasOwnProperty('if')) {
                                 _this.handleConditionalElement(elementToRefresh);

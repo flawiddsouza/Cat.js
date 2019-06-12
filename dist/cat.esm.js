@@ -378,6 +378,10 @@ class Cat {
     }
 
     handleConditionalElement(ifConditionalElement) {
+        if(ifConditionalElement.closest('[data-loop')) { // exclude data-loop and the elements inside it
+            return
+        }
+
         let conditionals = {};
 
         conditionals['if'] = ifConditionalElement;
@@ -422,8 +426,11 @@ class Cat {
         }
     }
 
-    handleConditionalElements() {
-        let ifConditionalElements = this.rootElement.querySelectorAll('[data-if]');
+    handleConditionalElements(element=null) {
+        if(!element) {
+            element = this.rootElement;
+        }
+        let ifConditionalElements = element.querySelectorAll('[data-if]');
 
         ifConditionalElements.forEach(ifConditionalElement => {
             this.handleConditionalElement(ifConditionalElement);
@@ -517,6 +524,7 @@ class Cat {
                             elementToRefresh.loopItems.forEach(loopItem => {
                                 _this.handleEchoElements(loopItem);
                                 _this.handleEventListeners(loopItem);
+                                _this.handleConditionalElements(loopItem);
                             });
                         } else if(elementToRefresh.dataset.hasOwnProperty('if')) {
                             _this.handleConditionalElement(elementToRefresh);

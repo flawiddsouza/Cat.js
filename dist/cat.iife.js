@@ -13,7 +13,8 @@ var Cat = (function () {
         '(',
         ')',
         '>',
-        '<'
+        '<',
+        '!'
     ];
 
     let keywords = [

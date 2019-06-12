@@ -10,7 +10,8 @@ let separators = [
     '(',
     ')',
     '>',
-    '<'
+    '<',
+    '!'
 ];
 
 let keywords = [

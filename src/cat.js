@@ -265,6 +265,7 @@ export default class Cat {
 
         if(parsedIfCondition) {
             this.showElement(conditionals.if)
+            this.handleDataValueElements(conditionals.if)
         } else {
             let conditionMet = false
 
@@ -272,12 +273,14 @@ export default class Cat {
                 if(!conditionMet && eval(elseIf.dataset.elseIf)) {
                     conditionMet = true
                     this.showElement(elseIf)
+                    this.handleDataValueElements(elseIf)
                 }
             })
 
             if(!conditionMet && conditionals.else) {
                 conditionMet =  true
                 this.showElement(conditionals.else)
+                this.handleDataValueElements(conditionals.else)
             }
         }
     }
@@ -399,10 +402,17 @@ export default class Cat {
     }
 
     handleDataValueElement(element) {
+        let dataIfParent = element.closest('[data-if]')
+        if(dataIfParent && dataIfParent.style.display === 'none') { // don't touch data-if elements that are hidden
+            return
+        }
         element.value = this.getParsedExpression(element.dataset.value, element)
     }
 
-    handleDataValueElements() {
+    handleDataValueElements(element=null) {
+        if(!element) {
+            element = this.rootElement
+        }
         let inputDataValueElements = this.rootElement.querySelectorAll('input[data-value], textarea[data-value]')
         inputDataValueElements.forEach(inputDataValueElement => {
             this.handleDataValueElement(inputDataValueElement)

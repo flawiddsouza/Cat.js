@@ -192,14 +192,22 @@ export default class Cat {
         return textNodes
     }
 
+    isParentElementDataLoop(element) {
+        if(element && element.parentElement && element.parentElement.dataset.hasOwnProperty('loop')) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     handleEchoElements(element=null) {
         if(!element) {
             element = this.rootElement
         }
         let textNodes = this.textNodesUnder(element, /{{.*?}}/g)
-        textNodes = textNodes.filter(textNode => !textNode.parentElement.dataset.loop) // exclude loop elements
-        textNodes = textNodes.filter(textNode => !textNode.parentElement.parentElement.dataset.loop) // exclude loop elements that have nested elements
-        textNodes = textNodes.filter(textNode => !textNode.parentElement.parentElement.parentElement.dataset.loop) // exclude loop elements that have nested elements inside nested elements
+        textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode)) // exclude loop elements
+        textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement)) // exclude loop elements that have nested elements
+        textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement.parentElement)) // exclude loop elements that have nested elements inside nested elements
         textNodes.forEach(textNode => {
             this.handleEcho(textNode.nodeValue, textNode)
         })
@@ -347,14 +355,14 @@ export default class Cat {
                     _this.dataBindings[prop].forEach(elementToRefresh => {
                         if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                             _this.handleDataValueElement(elementToRefresh)
-                        } else if(elementToRefresh.dataset.hasOwnProperty('loop')) {
+                        } else if(elementToRefresh.hasOwnProperty('dataset') &&elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh)
                             elementToRefresh.loopItems.forEach(loopItem => {
                                 _this.handleEchoElements(loopItem)
                                 _this.handleEventListeners(loopItem)
                                 _this.handleConditionalElements(loopItem)
                             })
-                        } else if(elementToRefresh.dataset.hasOwnProperty('if')) {
+                        } else if(elementToRefresh.hasOwnProperty('dataset') &&elementToRefresh.dataset.hasOwnProperty('if')) {
                             _this.handleConditionalElement(elementToRefresh)
                         } else {
                             _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh)

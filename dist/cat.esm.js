@@ -319,10 +319,6 @@ class Cat {
     handleLoopElement(loopElement) {
         let insertedElement = null;
 
-        if(this.dataBindings.hasOwnProperty(loopElement.dataset.loop) && !this.dataBindings[loopElement.dataset.loop].includes(loopElement)) {
-            this.dataBindings[loopElement.dataset.loop].push(loopElement);
-        }
-
         if(!loopElement.hasOwnProperty('loopItems')) {
             loopElement.loopItems = [];
         } else {
@@ -331,6 +327,10 @@ class Cat {
         }
 
         let { itemVariable, index, accessVariable } = this.parseDataLoop(loopElement.dataset.loop);
+
+        if(this.dataBindings.hasOwnProperty(accessVariable) && !this.dataBindings[accessVariable].includes(loopElement)) {
+            this.dataBindings[accessVariable].push(loopElement);
+        }
 
         this[accessVariable].forEach((item, itemIndex) => {
 

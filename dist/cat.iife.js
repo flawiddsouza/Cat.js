@@ -306,6 +306,19 @@ var Cat = (function () {
             });
         }
 
+        parseDataLoop(string) {
+            let match = string.match(/(.*?) *in * (.*)/);
+            let bracketMatch = null;
+            if(match[1].startsWith('(')) {
+                bracketMatch = match[1].slice(1,-1).split(',');
+            }
+            return {
+                itemVariable: match[1].startsWith('(') ? bracketMatch[0].trim() : match[1].trim(),
+                index: match[1].startsWith('(') ? (bracketMatch.hasOwnProperty(1) ? bracketMatch[1].trim() : null) : null,
+                accessVariable: match[2].trim()
+            }
+        }
+
         handleLoopElement(loopElement) {
             let insertedElement = null;
 
@@ -320,7 +333,14 @@ var Cat = (function () {
                 this.showElement(loopElement);
             }
 
-            this[loopElement.dataset.loop].forEach(item => {
+            let { itemVariable, index, accessVariable } = this.parseDataLoop(loopElement.dataset.loop);
+
+            this[accessVariable].forEach((item, itemIndex) => {
+
+                item = {
+                    [itemVariable]: item,
+                    [index]: itemIndex,
+                };
 
                 let loopElementCopy = loopElement.cloneNode(true);
                 delete loopElementCopy.dataset.loop;

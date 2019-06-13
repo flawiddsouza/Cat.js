@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cat.js</title>
+    <script src="../cat.iife.js"></script>
+    <script src="components/HelloWorld.js"></script>
+    <script src="script.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div data-if="cat() === 99">1 if cat() === 99</div>
+
+        <div data-if="1 > 2">2 if</div>
+        <div data-else>2 else</div>
+
+        <div data-if="false">3 if</div>
+        <div data-else-if="true === false">3 else-if</div>
+
+        <div data-if="false">4 if</div>
+        <div data-else-if="true">4 else-if</div>
+        <div data-else>4 else</div>
+
+        <div data-if="1 === 2">5 if</div>
+        <div data-else-if="1 === 2">5 else-if</div>
+        <div data-else-if="1 === 2">5 else-if 2</div>
+        <div data-else-if="1 === 1">5 else-if 3</div>
+
+        <br>
+
+        <div>{{ cat() }} + 1 = {{ cat() + 1 }}</div>
+        <div>{{ 1 + 1 }}</div>
+        <div>{{ 10 }}</div>
+
+        <button data-on-click="sayHello($event)">Alert('hey') {{ test }}</button>
+
+        <br>
+
+        <div data-loop="items">{{ name }} - ({{ id }} + 10 = {{ id + 10 }}) - {{ 10 + id }} {{ cat() + 1 + ` ${cat()}` }} {{ inputTest }}</div>
+
+        <hello-world>
+            <span slot="test">Hey</span>
+        </hello-world>
+        <hello-world></hello-world>
+
+        <div>
+            Input: {{ inputTest }}<br>
+            <input type="text" data-on-input="inputTest = $event.target.value" data-value="inputTest">
+            <input type="text" data-on-input="inputTest = $event.target.value" data-value="inputTest">
+        </div>
+
+        <br>
+
+        <span>Counter: {{ counter }}</span><br>
+        <button data-on-click="counterAdd1()">Counter + 1</button>
+    </div>
+</body>
+</html>

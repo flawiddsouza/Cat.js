@@ -1,0 +1,33 @@
+<script src="../cat.iife.js"></script>
+
+<main id="cat">
+    <div data-loop="item in array">
+        {{ item.data }}
+    </div>
+    <br>
+    <div data-loop="(item, index) in array">
+        <b>{{ index }}</b> {{ item.data }}
+    </div>
+    <br>
+    <div data-loop="(item) in array">
+        {{ item.data }}
+    </div>
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        array: [
+            {
+                id: 1,
+                data: 'Hey'
+            },
+            {
+                id: 2,
+                data: 'Nay'
+            }
+        ]
+    }
+})
+</script>

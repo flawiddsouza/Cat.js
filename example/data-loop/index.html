@@ -12,6 +12,21 @@
     <div data-loop="(item) in array">
         {{ item.data }}
     </div>
+    <br>
+    <table>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>data</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-loop="item in array">
+                <td><a href="#" data-on-click="alert(item.id)">{{ item.data }}</a></td>
+                <td>{{ item.data }}</td>
+            </tr>
+        </tbody>
+    </table>
 </main>
 
 <script>
@@ -31,3 +46,14 @@ new Cat({
     }
 })
 </script>
+
+<style>
+table {
+    border-collapse: collapse
+}
+
+table th, table td {
+    border: 1px solid rebeccapurple;
+    padding: 0.5em;
+}
+</style>

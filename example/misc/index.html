@@ -36,7 +36,7 @@
 
         <br>
 
-        <div data-loop="items">{{ name }} - ({{ id }} + 10 = {{ id + 10 }}) - {{ 10 + id }} {{ cat() + 1 + ` ${cat()}` }} {{ inputTest }}</div>
+        <div data-loop="item in items">{{ item.name }} - ({{ item.id }} + 10 = {{ item.id + 10 }}) - {{ 10 + item.id }} {{ cat() + 1 + ` ${cat()}` }} {{ inputTest }}</div>
 
         <hello-world>
             <span slot="test">Hey</span>

@@ -553,14 +553,14 @@ var Cat = (function () {
                         _this.dataBindings[prop].forEach(elementToRefresh => {
                             if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                                 _this.handleDataValueElement(elementToRefresh);
-                            } else if(elementToRefresh.hasOwnProperty('dataset') &&elementToRefresh.dataset.hasOwnProperty('loop')) {
+                            } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
                                 _this.handleLoopElement(elementToRefresh);
                                 elementToRefresh.loopItems.forEach(loopItem => {
                                     _this.handleEchoElements(loopItem);
                                     _this.handleEventListeners(loopItem);
                                     _this.handleConditionalElements(loopItem);
                                 });
-                            } else if(elementToRefresh.hasOwnProperty('dataset') &&elementToRefresh.dataset.hasOwnProperty('if')) {
+                            } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
                                 _this.handleConditionalElement(elementToRefresh);
                             } else {
                                 _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);

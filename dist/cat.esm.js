@@ -231,6 +231,9 @@ class Cat {
             // handle html > data-value
             this.handleDataValueElements();
 
+            // unhide root element if hidden
+            this.rootElement.removeAttribute('hidden');
+
             // handle mounted()
             if(paramsObject.mounted) {
                 paramsObject.mounted.call(this.proxy);

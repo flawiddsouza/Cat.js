@@ -540,20 +540,29 @@ class Cat {
         });
     }
 
-    handleDataBindings() {
-        let _this = this;
+    handleDataBindings(fakeThis=null, parentPath=null) {
+        let _this;
+        if(fakeThis !== null) {
+            _this = fakeThis;
+        } else {
+            _this = this;
+        }
         return {
             get(target, prop, receiver) {
                 if(typeof target[prop] === 'object' && target[prop] !== null) {
-                    return new Proxy(target[prop], _this.handleDataBindings)
+                    parentPath = parentPath ? parentPath + '.' : '';
+                    return new Proxy(target[prop], _this.handleDataBindings(_this, parentPath + prop))
                 } else {
                     return target[prop]
                 }
             },
             set(obj, prop, value) {
+                let path = parentPath ? parentPath + '.' : '';
+                path = path + prop;
                 Reflect.set(...arguments);
-                if(_this.dataBindings.hasOwnProperty(prop)) {
-                    _this.dataBindings[prop].forEach(elementToRefresh => {
+                let actualProp = path.split('.')[0];
+                if(_this.dataBindings.hasOwnProperty(actualProp)) {
+                    _this.dataBindings[actualProp].forEach(elementToRefresh => {
                         if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                             _this.handleDataValueElement(elementToRefresh);
                         } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {

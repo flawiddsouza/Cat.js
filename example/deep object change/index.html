@@ -1,0 +1,33 @@
+<script src="../cat.iife.js"></script>
+
+<main id="cat">
+    <div>
+        topLevel: {{ topLevel }}
+        <button data-on-click="topLevel += ' Changed'">Change</button>
+    </div>
+    <br>
+    <div>
+        item.nestingLevel1: {{ item.nestingLevel1 }}
+        <button data-on-click="item.nestingLevel1 += ' Changed'">Change</button>
+    </div>
+    <br>
+    <div>
+        item.innerItem.nestingLevel2: {{ item.innerItem.nestingLevel2 }}
+        <button data-on-click="item.innerItem.nestingLevel2 += ' Changed'">Change</button>
+    </div>
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        topLevel: 'Top Level',
+        item: {
+            nestingLevel1: 'Nesting Level 1',
+            innerItem: {
+                nestingLevel2: 'Nesting Level 2'
+            }
+        }
+    }
+})
+</script>

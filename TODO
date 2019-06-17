@@ -1,5 +1,4 @@
-- Implement refresh of data-loop on array modifications - push, pop, splice, replaced - plus, perform only the patches instead of refreshing all elements belonging to a data-loop
-- refresh data-if on data changes
+- data-loop > perform only the patches instead of refreshing all elements belonging to a data-loop
 - Implement data-model, to work like v-model from Vue
 - Figure out why
     <input type="text" required data-on-input="addRating = $event.target.value" data-value="addRating">

@@ -232,7 +232,7 @@ class Cat {
             this.handleDataValueElements();
 
             // unhide root element if hidden
-            this.rootElement.removeAttribute('hidden');
+            this.rootElement.hidden = false;
 
             // handle mounted()
             if(paramsObject.mounted) {
@@ -243,11 +243,11 @@ class Cat {
     }
 
     hideElement(element) {
-        element.style.display = 'none';
+        element.hidden = true;
     }
 
     showElement(element) {
-        element.style.display = '';
+        element.hidden = '';
     }
 
     getParsedExpression(unparsedExpression, element) {

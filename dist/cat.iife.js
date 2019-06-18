@@ -235,7 +235,7 @@ var Cat = (function () {
                 this.handleDataValueElements();
 
                 // unhide root element if hidden
-                this.rootElement.removeAttribute('hidden');
+                this.rootElement.hidden = false;
 
                 // handle mounted()
                 if(paramsObject.mounted) {
@@ -246,11 +246,11 @@ var Cat = (function () {
         }
 
         hideElement(element) {
-            element.style.display = 'none';
+            element.hidden = true;
         }
 
         showElement(element) {
-            element.style.display = '';
+            element.hidden = '';
         }
 
         getParsedExpression(unparsedExpression, element) {

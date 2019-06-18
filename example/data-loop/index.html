@@ -1,15 +1,15 @@
 <script src="../cat.iife.js"></script>
 
 <main id="cat">
-    <div data-loop="item in array">
+    <div data-loop="item in arrayOfObjects">
         {{ item.data }}
     </div>
     <br>
-    <div data-loop="(item, index) in array">
+    <div data-loop="(item, index) in arrayOfObjects">
         <b>{{ index }}</b> {{ item.data }}
     </div>
     <br>
-    <div data-loop="(item) in array">
+    <div data-loop="(item) in arrayOfObjects">
         {{ item.data }}
     </div>
     <br>
@@ -21,19 +21,24 @@
             </tr>
         </thead>
         <tbody>
-            <tr data-loop="item in array">
+            <tr data-loop="item in arrayOfObjects">
                 <td><a href="#" data-on-click="alert(item.id)">{{ item.data }}</a></td>
                 <td>{{ item.data }}</td>
             </tr>
         </tbody>
     </table>
+    <br>
+    Array of Elements:
+    <div data-loop="(item, i) in arrayOfElements">
+        Index: {{ i }}, Value: {{ item }}
+    </div>
 </main>
 
 <script>
 new Cat({
     el: '#cat',
     data: {
-        array: [
+        arrayOfObjects: [
             {
                 id: 1,
                 data: 'Hey'
@@ -42,6 +47,12 @@ new Cat({
                 id: 2,
                 data: 'Nay'
             }
+        ],
+        arrayOfElements: [
+            1,
+            'cat',
+            2,
+            3
         ]
     }
 })

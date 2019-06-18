@@ -160,7 +160,16 @@ export default class Cat {
             this.dataBindings[accessVariable].push(loopElement)
         }
 
-        this[accessVariable].forEach((item, itemIndex) => {
+        let loop = this[accessVariable]
+
+        if(!isNaN(accessVariable)) {
+            loop = []
+            for(let i=1; i<=accessVariable; i++) {
+                loop.push(i)
+            }
+        }
+
+        loop.forEach((item, itemIndex) => {
 
             item = {
                 [itemVariable]: item,

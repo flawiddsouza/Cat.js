@@ -602,7 +602,7 @@ var Cat = (function () {
 
         handleDataValueElement(element) {
             let dataIfParent = element.closest('[data-if]');
-            if(dataIfParent && dataIfParent.style.display === 'none') { // don't touch data-if elements that are hidden
+            if(dataIfParent && dataIfParent.hidden) { // don't touch data-if elements that are hidden
                 return
             }
             element.value = this.getParsedExpression(element.dataset.value, element);

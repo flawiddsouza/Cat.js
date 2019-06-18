@@ -488,7 +488,7 @@ class Cat {
             element = this.rootElement;
         }
 
-        let eventListeners = element.querySelectorAll(`
+        let elements = element.querySelectorAll(`
             [data-on-click],
             [data-on-input],
             [data-on-blur],
@@ -501,30 +501,41 @@ class Cat {
             [data-on-submit]
         `);
 
-        eventListeners.forEach(eventListener => {
-            let event = Object.keys(eventListener.dataset)[0].replace('on', '').toLowerCase();
-            let eventListenerExpression = Object.values(eventListener.dataset)[0];
-            eventListener.addEventListener(event, ($event) => {
-                let tokens  = tokenize(eventListenerExpression);
+        elements.forEach(element => {
+            let eventListeners = [];
 
-                let parsedExpression = '';
+            Object.keys(element.dataset).forEach(datasetKey => {
+                if(datasetKey.startsWith('on')) {
+                    eventListeners.push({
+                        event: datasetKey.replace('on', '').toLowerCase(),
+                        eventListenerExpression: element.dataset[datasetKey]
+                    });
+                }
+            });
 
-                tokens.forEach(token => {
-                    if(token.type === 'Variable') {
-                        let tokenValue = token.value.split('.')[0];
-                        if(eventListener.loopItem && eventListener.loopItem.hasOwnProperty(tokenValue)) {
-                            parsedExpression += 'eventListener.loopItem.' + token.value;
-                        } else if(this.hasOwnProperty(tokenValue)) {
-                            parsedExpression += 'this.proxy.' + token.value;
+            eventListeners.forEach(eventListener => {
+                element.addEventListener(eventListener.event, ($event) => {
+                    let tokens  = tokenize(eventListener.eventListenerExpression);
+
+                    let parsedExpression = '';
+
+                    tokens.forEach(token => {
+                        if(token.type === 'Variable') {
+                            let tokenValue = token.value.split('.')[0];
+                            if(element.loopItem && element.loopItem.hasOwnProperty(tokenValue)) {
+                                parsedExpression += 'element.loopItem.' + token.value;
+                            } else if(this.hasOwnProperty(tokenValue)) {
+                                parsedExpression += 'this.proxy.' + token.value;
+                            } else {
+                                parsedExpression += token.value;
+                            }
                         } else {
                             parsedExpression += token.value;
                         }
-                    } else {
-                        parsedExpression += token.value;
-                    }
-                });
+                    });
 
-                eval(parsedExpression);
+                    eval(parsedExpression);
+                });
             });
         });
     }

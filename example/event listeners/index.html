@@ -1,0 +1,11 @@
+<script src="../cat.iife.js"></script>
+
+<main id="cat">
+    <button data-if="true" data-on-click="alert('Hey')" data-on-keydown="alert('Cat')">Say Hey</button>
+</main>
+
+<script>
+new Cat({
+    el: '#cat'
+})
+</script>

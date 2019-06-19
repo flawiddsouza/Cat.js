@@ -537,7 +537,7 @@ var Cat = (function () {
                             }
                         });
 
-                        new Function('$event', 'return ' + parsedExpression).call(this, $event);
+                        new Function('$event', 'element', 'return ' + parsedExpression).call(this, $event, element);
                     });
                 });
             });

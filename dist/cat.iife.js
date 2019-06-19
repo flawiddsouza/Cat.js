@@ -451,7 +451,7 @@ var Cat = (function () {
             }
 
             let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if);
-            parsedIfCondition = eval(parsedIfCondition);
+            parsedIfCondition = new Function('return ' + parsedIfCondition).call(this);
 
             if(parsedIfCondition) {
                 this.showElement(conditionals.if);
@@ -460,7 +460,7 @@ var Cat = (function () {
                 let conditionMet = false;
 
                 conditionals.elseIf.forEach(elseIf => {
-                    if(!conditionMet && eval(elseIf.dataset.elseIf)) {
+                    if(!conditionMet && new Function('return ' + elseIf.dataset.elseIf).call(this)) {
                         conditionMet = true;
                         this.showElement(elseIf);
                         this.handleDataValueElements(elseIf);
@@ -537,7 +537,7 @@ var Cat = (function () {
                             }
                         });
 
-                        eval(parsedExpression);
+                        new Function('$event', 'return ' + parsedExpression).call(this, $event);
                     });
                 });
             });

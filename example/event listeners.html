@@ -1,0 +1,13 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    <button data-if="true" data-on-click="alert('Click captured')" data-on-keydown="alert('Keydown captured')">Test</button>
+    <br><br>
+    <button data-on-click="console.log($event)">Log event to console</button>
+</main>
+
+<script>
+new Cat({
+    el: '#cat'
+})
+</script>

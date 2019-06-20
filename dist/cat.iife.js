@@ -178,6 +178,25 @@ var Cat = (function () {
         return tokens
     }
 
+    function forEach(array, callback, scope) {
+        for (var i = 0; i < array.length; i++) {
+            callback.call(scope, array[i], i);
+        }
+    }
+
+    function getDatasetElements(parentElement, datasetWildcard) {
+        let elements = [];
+        forEach(parentElement.getElementsByTagName('*'), element => {
+            let datasetKeys = Object.keys(element.dataset);
+            datasetKeys.forEach(datasetKey => {
+                if(datasetKey.startsWith(datasetWildcard)) {
+                    elements.push(element);
+                }
+            });
+        });
+        return elements
+    }
+
     class Cat {
         constructor(paramsObject) {
 
@@ -491,27 +510,18 @@ var Cat = (function () {
                 element = this.rootElement;
             }
 
-            let elements = element.querySelectorAll(`
-            [data-on-click],
-            [data-on-input],
-            [data-on-blur],
-            [data-on-focus],
-            [data-on-mouseover],
-            [data-on-mousedown],
-            [data-on-mouseup],
-            [data-on-keyup],
-            [data-on-keydown],
-            [data-on-submit]
-        `);
+            let elements = getDatasetElements(element, 'on');
 
             elements.forEach(element => {
                 let eventListeners = [];
 
                 Object.keys(element.dataset).forEach(datasetKey => {
                     if(datasetKey.startsWith('on')) {
+                        let splitEventFromEventModifiers = datasetKey.replace('on', '').toLowerCase().split('.');
                         eventListeners.push({
-                            event: datasetKey.replace('on', '').toLowerCase(),
-                            eventListenerExpression: element.dataset[datasetKey]
+                            event: splitEventFromEventModifiers[0],
+                            eventListenerExpression: element.dataset[datasetKey],
+                            eventModifiers: splitEventFromEventModifiers.filter((item, index) => index !== 0)
                         });
                     }
                 });
@@ -536,6 +546,10 @@ var Cat = (function () {
                                 parsedExpression += token.value;
                             }
                         });
+
+                        if(eventListener.eventModifiers.includes('prevent')) {
+                            $event.preventDefault();
+                        }
 
                         new Function('$event', 'element', parsedExpression).call(this, $event, element);
                     });

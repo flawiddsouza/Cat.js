@@ -1,4 +1,5 @@
 import tokenize from './tokenizer'
+import * as helpers from './helpers'
 
 export default class Cat {
     constructor(paramsObject) {
@@ -313,27 +314,18 @@ export default class Cat {
             element = this.rootElement
         }
 
-        let elements = element.querySelectorAll(`
-            [data-on-click],
-            [data-on-input],
-            [data-on-blur],
-            [data-on-focus],
-            [data-on-mouseover],
-            [data-on-mousedown],
-            [data-on-mouseup],
-            [data-on-keyup],
-            [data-on-keydown],
-            [data-on-submit]
-        `)
+        let elements = helpers.getDatasetElements(element, 'on')
 
         elements.forEach(element => {
             let eventListeners = []
 
             Object.keys(element.dataset).forEach(datasetKey => {
                 if(datasetKey.startsWith('on')) {
+                    let splitEventFromEventModifiers = datasetKey.replace('on', '').toLowerCase().split('.')
                     eventListeners.push({
-                        event: datasetKey.replace('on', '').toLowerCase(),
-                        eventListenerExpression: element.dataset[datasetKey]
+                        event: splitEventFromEventModifiers[0],
+                        eventListenerExpression: element.dataset[datasetKey],
+                        eventModifiers: splitEventFromEventModifiers.filter((item, index) => index !== 0)
                     })
                 }
             })
@@ -358,6 +350,10 @@ export default class Cat {
                             parsedExpression += token.value
                         }
                     })
+
+                    if(eventListener.eventModifiers.includes('prevent')) {
+                        $event.preventDefault()
+                    }
 
                     new Function('$event', 'element', parsedExpression).call(this, $event, element)
                 })

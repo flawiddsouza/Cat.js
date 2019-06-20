@@ -22,7 +22,7 @@
         </thead>
         <tbody>
             <tr data-loop="item in arrayOfObjects">
-                <td><a href="#" data-on-click="alert(item.id)">{{ item.data }}</a></td>
+                <td><a href="#" data-on-click.prevent="alert(item.id)">{{ item.data }}</a></td>
                 <td>{{ item.data }}</td>
             </tr>
         </tbody>

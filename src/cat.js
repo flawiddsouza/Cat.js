@@ -273,7 +273,6 @@ export default class Cat {
         }
 
         let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if)
-        parsedIfCondition = new Function('return ' + parsedIfCondition).call(this)
 
         if(parsedIfCondition) {
             this.showElement(conditionals.if)
@@ -282,7 +281,8 @@ export default class Cat {
             let conditionMet = false
 
             conditionals.elseIf.forEach(elseIf => {
-                if(!conditionMet && new Function('return ' + elseIf.dataset.elseIf).call(this)) {
+                let parsedElseIfCondition = this.getParsedExpression(elseIf.dataset.elseIf, elseIf)
+                if(!conditionMet && parsedElseIfCondition) {
                     conditionMet = true
                     this.showElement(elseIf)
                     this.handleDataValueElements(elseIf)

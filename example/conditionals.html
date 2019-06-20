@@ -1,0 +1,23 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    Current condition:
+    <span data-if="item.condition === 'if'">if</span>
+    <span data-else-if="item.condition === 'elseif'">elseif</span>
+    <span data-else>else</span>
+    <br>
+    <button data-on-click="item.condition = 'if'">Set condition to if</button>
+    <button data-on-click="item.condition = 'elseif'">Set condition to else if</button>
+    <button data-on-click="item.condition = 'else'">Set condition to else</button>
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        item: {
+            condition: 'if'
+        }
+    }
+})
+</script>

@@ -253,6 +253,9 @@ var Cat = (function () {
                 // handle html > data-value
                 this.handleDataValueElements();
 
+                // handle html > data-model
+                this.handleDataModelElements();
+
                 // unhide root element if hidden
                 this.rootElement.hidden = false;
 
@@ -509,6 +512,29 @@ var Cat = (function () {
             });
         }
 
+        createExpression(rawExpression, element) {
+            let tokens  = tokenize(rawExpression);
+
+            let parsedExpression = '';
+
+            tokens.forEach(token => {
+                if(token.type === 'Variable') {
+                    let tokenValue = token.value.split('.')[0];
+                    if(element.loopItem && element.loopItem.hasOwnProperty(tokenValue)) {
+                        parsedExpression += 'element.loopItem.' + token.value;
+                    } else if(this.hasOwnProperty(tokenValue)) {
+                        parsedExpression += 'this.proxy.' + token.value;
+                    } else {
+                        parsedExpression += token.value;
+                    }
+                } else {
+                    parsedExpression += token.value;
+                }
+            });
+
+            return parsedExpression
+        }
+
         handleEventListeners(element=null) {
             if(!element) {
                 element = this.rootElement;
@@ -531,31 +557,15 @@ var Cat = (function () {
                 });
 
                 eventListeners.forEach(eventListener => {
+                    let createdExpression = this.createExpression(eventListener.eventListenerExpression, element);
+
                     element.addEventListener(eventListener.event, ($event) => {
-                        let tokens  = tokenize(eventListener.eventListenerExpression);
-
-                        let parsedExpression = '';
-
-                        tokens.forEach(token => {
-                            if(token.type === 'Variable') {
-                                let tokenValue = token.value.split('.')[0];
-                                if(element.loopItem && element.loopItem.hasOwnProperty(tokenValue)) {
-                                    parsedExpression += 'element.loopItem.' + token.value;
-                                } else if(this.hasOwnProperty(tokenValue)) {
-                                    parsedExpression += 'this.proxy.' + token.value;
-                                } else {
-                                    parsedExpression += token.value;
-                                }
-                            } else {
-                                parsedExpression += token.value;
-                            }
-                        });
 
                         if(eventListener.eventModifiers.includes('prevent')) {
                             $event.preventDefault();
                         }
 
-                        new Function('$event', 'element', parsedExpression).call(this, $event, element);
+                        new Function('$event', 'element', createdExpression).call(this, $event, element);
                     });
                 });
             });
@@ -615,7 +625,7 @@ var Cat = (function () {
                                 });
                             } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
                                 _this.handleConditionalElement(elementToRefresh);
-                            } else {
+                            } else if(elementToRefresh.tagName !== 'INPUT') { // TODO figure out why input is in the dataBindings array
                                 _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
                             }
                         });
@@ -644,6 +654,84 @@ var Cat = (function () {
             let inputDataValueElements = this.rootElement.querySelectorAll('input[data-value], textarea[data-value]');
             inputDataValueElements.forEach(inputDataValueElement => {
                 this.handleDataValueElement(inputDataValueElement);
+            });
+        }
+
+        handleDataModelElement(element) {
+            let createdExpression = this.createExpression(element.dataset.model, element);
+
+            if(element.type === 'text' || element.type === 'number' || element.type === 'textarea') {
+                element.value = this.getParsedExpression(element.dataset.model, element);
+
+                element.addEventListener('input', $event => {
+                    new Function('$event', `${createdExpression} = $event.target.value`).call(this, $event);
+                });
+            }
+
+            if(element.type === 'checkbox') {
+                // TODO if more than one checkbox with the same data-model, then the assignment needs to be an array
+                if(element.hasAttribute('value')) {
+                    let query = `input[type="checkbox"][data-model="${element.dataset.model}"]`;
+                    let checkboxElementsWithSameDataModel = Array.from(this.rootElement.querySelectorAll(query));
+                    if(checkboxElementsWithSameDataModel.length > 1) {
+                        new Function(`
+                        if(typeof ${createdExpression} !== Array) {
+                            ${createdExpression} = []
+                        }
+                    `).call(this);
+                    }
+                    element.addEventListener('change', $event => {
+                        if(checkboxElementsWithSameDataModel.length === 1) {
+                            new Function('$event', `
+                            if($event.target.checked) {
+                                ${createdExpression} = $event.target.value
+                            }  else {
+                                ${createdExpression} = null
+                            }
+                        `).call(this, $event);
+                        } else if(checkboxElementsWithSameDataModel.length > 1) {
+                            new Function('$event', `
+                            if($event.target.checked) {
+                                ${createdExpression}.push($event.target.value)
+                            } else {
+                                ${createdExpression} = ${createdExpression}.filter(item => item != $event.target.value)
+                            }
+                        `).call(this, $event);
+                        }
+                    });
+                } else {
+                    element.addEventListener('change', $event => {
+                        new Function('$event', `${createdExpression} = $event.target.checked`).call(this, $event);
+                    });
+                }
+            }
+
+            if(element.type === 'radio' && element.hasAttribute('value')) {
+                if(element.value === this.getParsedExpression(element.dataset.model, element)) {
+                    element.checked = true;
+                }
+                let query = `input[type="radio"][data-model="${element.dataset.model}"]`;
+                let radioElementsWithSameDataModel = Array.from(this.rootElement.querySelectorAll(query));
+                element.addEventListener('change', $event => {
+                    new Function('$event', `$event.target.checked ? ${createdExpression} = $event.target.value : ${createdExpression} = null`).call(this, $event);
+                    radioElementsWithSameDataModel.forEach(radioElementWithSameDataModel => {
+                        if(radioElementWithSameDataModel !== element) {
+                            radioElementWithSameDataModel.checked = false;
+                        }
+                    });
+                });
+            }
+        }
+
+        handleDataModelElements(element=null) {
+            if(!element) {
+                element = this.rootElement;
+            }
+
+            let dataModelElements = document.querySelectorAll('[data-model]');
+
+            forEach(dataModelElements, element => {
+                this.handleDataModelElement(element);
             });
         }
     }

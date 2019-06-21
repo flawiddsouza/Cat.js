@@ -1,0 +1,63 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    input type=text<br>
+    <input type="text" data-model="message"><br>
+    textarea<br>
+    <textarea data-model="message"></textarea><br>
+    {{ message }}
+    <br><br>
+
+    input type=checkbox without value<br>
+    <input type="checkbox" data-model="checkboxType1Value">
+    <div>{{ checkboxType1Value }}</div>
+    <br>
+
+    single input type=checkbox with value<br>
+    <label>
+        <input type="checkbox" value="Cat" data-model="checkboxType3Value"> Cat
+    </label><br>
+    <div>{{ checkboxType3Value }}</div>
+    <div>Type: {{ getType(checkboxType3Value) }}</div>
+    <br>
+
+    multiple input type=checkbox with value<br>
+    <label>
+        <input type="checkbox" value="10" data-model="checkboxType2Value"> 10
+    </label><br>
+    <label>
+        <input type="checkbox" value="5" data-model="checkboxType2Value"> 5
+    </label>
+    <div>{{ checkboxType2Value }}</div>
+    <div>Type: {{ getType(checkboxType2Value) }}</div>
+    <br>
+
+    input type=radio (value required)<br>
+    <label>
+        <input type="radio" value="Radio 1" data-model="radioValue"> Radio 1
+    </label><br>
+    <label>
+        <input type="radio" value="Radio 2" data-model="radioValue"> Radio 2
+    </label>
+    <div>{{ radioValue }}</div>
+    <br><br>
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        message: 'Hey',
+        checkboxType1Value: null,
+        checkboxType2Value: null,
+        checkboxType3Value: null,
+        radioValue: 'Radio 1'
+    },
+    methods: {
+        getType(value) {
+            // console.log(JSON.parse(JSON.stringify(checkboxType2Value)))
+            return Array.isArray(value) ? 'Array' : 'Value'
+        }
+    }
+})
+</script>

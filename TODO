@@ -1,2 +1,1 @@
 - data-loop > perform only the patches instead of refreshing all elements belonging to a data-loop
-- Implement data-model, to work like v-model from Vue

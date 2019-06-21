@@ -613,7 +613,9 @@ class Cat {
                     _this.dataBindings[actualProp].forEach(elementToRefresh => {
                         if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                             _this.handleDataValueElement(elementToRefresh);
-                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('model')) ; else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
+                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('model')) {
+                            _this.handleDataModelValueUpdate(elementToRefresh);
+                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh);
                             elementToRefresh.loopItems.forEach(loopItem => {
                                 _this.handleEchoElements(loopItem);
@@ -622,7 +624,7 @@ class Cat {
                             });
                         } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
                             _this.handleConditionalElement(elementToRefresh);
-                        } else if(elementToRefresh.tagName !== 'INPUT') { // TODO figure out why input is in the dataBindings array
+                        } else {
                             _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
                         }
                     });
@@ -666,7 +668,7 @@ class Cat {
         }
 
         if(element.type === 'checkbox') {
-            // TODO if more than one checkbox with the same data-model, then the assignment needs to be an array
+            this.getParsedExpression(element.dataset.model, element); // just here to push the element into the dataBindings object
             if(element.hasAttribute('value')) {
                 let query = `input[type="checkbox"][data-model="${element.dataset.model}"]`;
                 let checkboxElementsWithSameDataModel = Array.from(this.rootElement.querySelectorAll(query));
@@ -730,6 +732,26 @@ class Cat {
         forEach(dataModelElements, element => {
             this.handleDataModelElement(element);
         });
+    }
+
+    handleDataModelValueUpdate(element) {
+        let parsedExpression = this.getParsedExpression(element.dataset.model, element);
+
+        if(element.type === 'text' || element.type === 'textarea' || element.type === 'number') {
+            element.value = parsedExpression;
+        }
+
+        if(element.type === 'checkbox') {
+            if(element.hasAttribute('value')) {
+                if(element.value === parsedExpression || parsedExpression.includes(element.value)) {
+                    element.checked = true;
+                } else {
+                    element.checked = false;
+                }
+            } else {
+                element.checked = parsedExpression;
+            }
+        }
     }
 }
 

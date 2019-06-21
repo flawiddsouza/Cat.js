@@ -10,12 +10,14 @@
 
     input type=checkbox without value<br>
     <input type="checkbox" data-model="checkboxType1Value">
+    <input type="checkbox" data-model="checkboxType1Value"> Duplicate
     <div>{{ checkboxType1Value }}</div>
     <br>
 
     single input type=checkbox with value<br>
     <label>
         <input type="checkbox" value="Cat" data-model="checkboxType3Value"> Cat
+        <input type="checkbox" value="Cat" data-model="checkboxType3Value"> Cat (Duplicate)
     </label><br>
     <div>{{ checkboxType3Value }}</div>
     <div>Type: {{ getType(checkboxType3Value) }}</div>
@@ -27,6 +29,9 @@
     </label><br>
     <label>
         <input type="checkbox" value="5" data-model="checkboxType2Value"> 5
+    </label><br>
+    <label>
+        <input type="checkbox" value="5" data-model="checkboxType2Value"> 5 (duplicate)
     </label>
     <div>{{ checkboxType2Value }}</div>
     <div>Type: {{ getType(checkboxType2Value) }}</div>
@@ -38,6 +43,9 @@
     </label><br>
     <label>
         <input type="radio" value="Radio 2" data-model="radioValue"> Radio 2
+    </label><br>
+    <label>
+        <input type="radio" value="Radio 2" data-model="radioValue"> Radio 2 (duplicate - won't work since it's a radio button)
     </label>
     <div>{{ radioValue }}</div>
     <br><br>
@@ -55,7 +63,6 @@ new Cat({
     },
     methods: {
         getType(value) {
-            // console.log(JSON.parse(JSON.stringify(checkboxType2Value)))
             return Array.isArray(value) ? 'Array' : 'Value'
         }
     }

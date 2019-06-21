@@ -420,6 +420,8 @@ export default class Cat {
                     _this.dataBindings[actualProp].forEach(elementToRefresh => {
                         if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                             _this.handleDataValueElement(elementToRefresh)
+                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('model')) {
+                            // refresh value property of data-model element
                         } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh)
                             elementToRefresh.loopItems.forEach(loopItem => {

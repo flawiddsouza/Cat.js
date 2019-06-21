@@ -613,7 +613,7 @@ class Cat {
                     _this.dataBindings[actualProp].forEach(elementToRefresh => {
                         if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
                             _this.handleDataValueElement(elementToRefresh);
-                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
+                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('model')) ; else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh);
                             elementToRefresh.loopItems.forEach(loopItem => {
                                 _this.handleEchoElements(loopItem);

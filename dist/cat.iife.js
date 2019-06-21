@@ -306,6 +306,10 @@ var Cat = (function () {
 
             let result = new Function('element', 'return ' + this.parsedExpressions[unparsedExpression]).call(this, element);
 
+            if(Array.isArray(result) || typeof result === 'object') { // Stringify objects and arrays
+                return JSON.stringify(result)
+            }
+
             return result
         }
 

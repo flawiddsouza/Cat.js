@@ -1,0 +1,66 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    watch message:<br>
+    message:<br>
+    <input type="text" data-model="message"><br>
+    {{ message }}
+    <br><br>
+    watch message2:<br>
+    message2:<br>
+    <input type="text" data-model="message2"><br>
+    {{ message2 }}
+    <br><br>
+    watch messageObj:<br>
+    messageObj.message:<br>
+    <input type="text" data-model="messageObj.message"><br>
+    {{ messageObj.message }}
+    <br><br>
+    watch messageObj2.nest.message<br>
+    messageObj2.nest.message:<br>
+    <input type="text" data-model="messageObj2.nest.message"><br>
+    {{ messageObj2.nest.message }}
+    <br><br>
+    watch messageObj2.nest2<br>
+    messageObj2.nest2.message:<br>
+    <input type="text" data-model="messageObj2.nest2.message"><br>
+    {{ messageObj2.nest2.message }}
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        message: 'Message 1',
+        message2: 'Message 2',
+        messageObj: {
+            message: 'Message 3'
+        },
+        messageObj2: {
+            nest: {
+                message: 'Message 4'
+            },
+            nest2: {
+                message: 'Message 5'
+            }
+        }
+    },
+    watch: {
+        message() {
+            alert('message1 changed')
+        },
+        message2() {
+            alert('message2 changed')
+        },
+        messageObj() {
+            alert('messageObj changed')
+        },
+        'messageObj2.nest.message'() {
+            alert('messageObj2.nest.message changed')
+        },
+        'messageObj2.nest2'() {
+            alert('messageObj2.nest2 changed')
+        }
+    }
+})
+</script>

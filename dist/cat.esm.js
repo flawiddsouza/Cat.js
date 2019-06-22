@@ -248,6 +248,11 @@ class Cat {
             paramsObject.created.call(this.proxy);
         }
 
+        // handle watch
+        if(paramsObject.watch) {
+            this.watch = paramsObject.watch;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
 
             if(typeof paramsObject.el === 'string') {
@@ -608,6 +613,9 @@ class Cat {
                 let path = parentPath ? parentPath + '.' : '';
                 path = path + prop;
                 Reflect.set(...arguments);
+                if(_this.watch) {
+                    _this.handleWatch(path);
+                }
                 let actualProp = path.split('.')[0];
                 if(_this.dataBindings.hasOwnProperty(actualProp)) {
                     _this.dataBindings[actualProp].forEach(elementToRefresh => {
@@ -618,9 +626,9 @@ class Cat {
                         } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
                             _this.handleLoopElement(elementToRefresh);
                             elementToRefresh.loopItems.forEach(loopItem => {
-                                _this.handleEchoElements(loopItem);
+                                _this.handleEchoElements(loopItem); // this
                                 _this.handleEventListeners(loopItem);
-                                _this.handleConditionalElements(loopItem);
+                                _this.handleConditionalElements(loopItem); // plus this add extreme lag if the array is being updated very quickly, like when text is being entered into an input element aka the input event - it's really bad
                             });
                         } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
                             _this.handleConditionalElement(elementToRefresh);
@@ -751,6 +759,20 @@ class Cat {
             } else {
                 element.checked = parsedExpression;
             }
+        }
+    }
+
+    handleWatch(path) {
+        let watchedProp = Object.keys(this.watch).find(watchedProp2 => {
+            let regex = new RegExp(`^${watchedProp2}$`);
+            if(regex.test(path)) { // watch exact path
+                return true
+            } else if(path.startsWith(watchedProp2) && typeof this[watchedProp2] === 'object') { // watch parent that has props under it
+                return true
+            }
+        });
+        if(watchedProp) {
+            this.watch[watchedProp].call(this);
         }
     }
 }

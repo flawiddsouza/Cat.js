@@ -333,10 +333,10 @@ var Cat = (function () {
             let regex = /{{ *(.*?) *}}/g;
             let matches = [...unparsedExpression.matchAll(regex)].map(item => item[1]);
 
-            if(!element.parentElement.hasOwnProperty('unparsedExpression')) {
-                element.parentElement.unparsedExpression = unparsedExpression;
+            if(!element.hasOwnProperty('unparsedExpression')) {
+                element.unparsedExpression = unparsedExpression;
             } else {
-                element.nodeValue = element.parentElement.unparsedExpression;
+                element.nodeValue = element.unparsedExpression;
             }
 
             matches.forEach(match => {
@@ -628,7 +628,7 @@ var Cat = (function () {
                             } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
                                 _this.handleConditionalElement(elementToRefresh);
                             } else {
-                                _this.handleEcho(elementToRefresh.parentElement.unparsedExpression, elementToRefresh);
+                                _this.handleEcho(elementToRefresh.unparsedExpression, elementToRefresh);
                             }
                         });
                     }

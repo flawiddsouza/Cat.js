@@ -1,14 +1,23 @@
 <script src="cat.iife.js"></script>
 
 <main id="cat">
+    <input type="text" data-model="message"><br>
     {{ message }}
+    <br>
+    <input type="text" data-model="message2"><br>
+    {{ message2 }}
+    <br>
+    <input type="text" data-model="message3"><br>
+    {{ message3 }} | {{ message3 }}
 </main>
 
 <script>
 new Cat({
     el: '#cat',
     data: {
-        message: 'Hey'
+        message: 'Message 1',
+        message2: 'Message 2',
+        message3: 'Message 3'
     }
 })
 </script>

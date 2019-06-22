@@ -197,6 +197,27 @@ var Cat = (function () {
         return elements
     }
 
+    function textNodesUnder(element, match=null) {
+        let n;
+        let textNodes = [];
+        let walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        while(n=walk.nextNode()) {
+            textNodes.push(n);
+        }
+        if(match) {
+            textNodes = textNodes.filter(textNode => textNode.nodeValue.match(match));
+        }
+        return textNodes
+    }
+
+    function hideElement(element) {
+        element.hidden = true;
+    }
+
+    function showElement(element) {
+        element.hidden = '';
+    }
+
     class Cat {
         constructor(paramsObject) {
 
@@ -265,14 +286,6 @@ var Cat = (function () {
                 }
             });
 
-        }
-
-        hideElement(element) {
-            element.hidden = true;
-        }
-
-        showElement(element) {
-            element.hidden = '';
         }
 
         getParsedExpression(unparsedExpression, element) {
@@ -355,7 +368,7 @@ var Cat = (function () {
                 loopElement.loopItems = [];
             } else {
                 loopElement.loopItems.forEach(loopItem => loopItem.remove());
-                this.showElement(loopElement);
+                showElement(loopElement);
             }
 
             let { itemVariable, index, accessVariable } = this.parseDataLoop(loopElement.dataset.loop);
@@ -383,7 +396,7 @@ var Cat = (function () {
                 let loopElementCopy = loopElement.cloneNode(true);
                 delete loopElementCopy.dataset.loop;
 
-                let textNodesUnderElementCopy = this.textNodesUnder(loopElementCopy);
+                let textNodesUnderElementCopy = textNodesUnder(loopElementCopy);
                 textNodesUnderElementCopy.forEach(textNode => {
                     textNode.loopItem = item;
                     textNode.parentElement.loopItem = item;
@@ -404,7 +417,7 @@ var Cat = (function () {
 
             });
 
-            this.hideElement(loopElement);
+            hideElement(loopElement);
         }
 
         handleLoopElements() {
@@ -413,19 +426,6 @@ var Cat = (function () {
             loopElements.forEach(loopElement => {
                 this.handleLoopElement(loopElement);
             });
-        }
-
-        textNodesUnder(element, match=null) {
-            let n;
-            let textNodes = [];
-            let walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-            while(n=walk.nextNode()) {
-                textNodes.push(n);
-            }
-            if(match) {
-                textNodes = textNodes.filter(textNode => textNode.nodeValue.match(match));
-            }
-            return textNodes
         }
 
         isParentElementDataLoop(element) {
@@ -440,7 +440,7 @@ var Cat = (function () {
             if(!element) {
                 element = this.rootElement;
             }
-            let textNodes = this.textNodesUnder(element, /{{.*?}}/g);
+            let textNodes = textNodesUnder(element, /{{.*?}}/g);
             textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode)); // exclude loop elements
             textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement)); // exclude loop elements that have nested elements
             textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement.parentElement)); // exclude loop elements that have nested elements inside nested elements
@@ -457,18 +457,18 @@ var Cat = (function () {
             let conditionals = {};
 
             conditionals['if'] = ifConditionalElement;
-            this.hideElement(ifConditionalElement);
+            hideElement(ifConditionalElement);
             conditionals['elseIf'] = [];
 
             let nextElementSibling =  ifConditionalElement.nextElementSibling;
 
             while(nextElementSibling) {
                 if(nextElementSibling.dataset.hasOwnProperty('elseIf')) {
-                    this.hideElement(nextElementSibling);
+                    hideElement(nextElementSibling);
                     conditionals['elseIf'].push(nextElementSibling);
                     nextElementSibling = nextElementSibling.nextElementSibling;
                 } else if(nextElementSibling.dataset.hasOwnProperty('else')) {
-                    this.hideElement(nextElementSibling);
+                    hideElement(nextElementSibling);
                     conditionals['else'] = nextElementSibling;
                     nextElementSibling = null;
                 } else {
@@ -479,7 +479,7 @@ var Cat = (function () {
             let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if);
 
             if(parsedIfCondition) {
-                this.showElement(conditionals.if);
+                showElement(conditionals.if);
                 this.handleDataValueElements(conditionals.if);
             } else {
                 let conditionMet = false;
@@ -488,14 +488,14 @@ var Cat = (function () {
                     let parsedElseIfCondition = this.getParsedExpression(elseIf.dataset.elseIf, elseIf);
                     if(!conditionMet && parsedElseIfCondition) {
                         conditionMet = true;
-                        this.showElement(elseIf);
+                        showElement(elseIf);
                         this.handleDataValueElements(elseIf);
                     }
                 });
 
                 if(!conditionMet && conditionals.else) {
                     conditionMet =  true;
-                    this.showElement(conditionals.else);
+                    showElement(conditionals.else);
                     this.handleDataValueElements(conditionals.else);
                 }
             }

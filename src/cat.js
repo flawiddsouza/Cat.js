@@ -71,14 +71,6 @@ export default class Cat {
 
     }
 
-    hideElement(element) {
-        element.hidden = true
-    }
-
-    showElement(element) {
-        element.hidden = ''
-    }
-
     getParsedExpression(unparsedExpression, element) {
         // if(!this.parsedExpressions.hasOwnProperty(unparsedExpression)) { // removing this reduces performance but enables dataBindings
             let tokens  = tokenize(unparsedExpression)
@@ -159,7 +151,7 @@ export default class Cat {
             loopElement.loopItems = []
         } else {
             loopElement.loopItems.forEach(loopItem => loopItem.remove())
-            this.showElement(loopElement)
+            helpers.showElement(loopElement)
         }
 
         let { itemVariable, index, accessVariable } = this.parseDataLoop(loopElement.dataset.loop)
@@ -187,7 +179,7 @@ export default class Cat {
             let loopElementCopy = loopElement.cloneNode(true)
             delete loopElementCopy.dataset.loop
 
-            let textNodesUnderElementCopy = this.textNodesUnder(loopElementCopy)
+            let textNodesUnderElementCopy = helpers.textNodesUnder(loopElementCopy)
             textNodesUnderElementCopy.forEach(textNode => {
                 textNode.loopItem = item
                 textNode.parentElement.loopItem = item
@@ -208,7 +200,7 @@ export default class Cat {
 
         })
 
-        this.hideElement(loopElement)
+        helpers.hideElement(loopElement)
     }
 
     handleLoopElements() {
@@ -217,19 +209,6 @@ export default class Cat {
         loopElements.forEach(loopElement => {
             this.handleLoopElement(loopElement)
         })
-    }
-
-    textNodesUnder(element, match=null) {
-        let n
-        let textNodes = []
-        let walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false)
-        while(n=walk.nextNode()) {
-            textNodes.push(n)
-        }
-        if(match) {
-            textNodes = textNodes.filter(textNode => textNode.nodeValue.match(match))
-        }
-        return textNodes
     }
 
     isParentElementDataLoop(element) {
@@ -244,7 +223,7 @@ export default class Cat {
         if(!element) {
             element = this.rootElement
         }
-        let textNodes = this.textNodesUnder(element, /{{.*?}}/g)
+        let textNodes = helpers.textNodesUnder(element, /{{.*?}}/g)
         textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode)) // exclude loop elements
         textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement)) // exclude loop elements that have nested elements
         textNodes = textNodes.filter(textNode => !this.isParentElementDataLoop(textNode.parentElement.parentElement)) // exclude loop elements that have nested elements inside nested elements
@@ -261,18 +240,18 @@ export default class Cat {
         let conditionals = {}
 
         conditionals['if'] = ifConditionalElement
-        this.hideElement(ifConditionalElement)
+        helpers.hideElement(ifConditionalElement)
         conditionals['elseIf'] = []
 
         let nextElementSibling =  ifConditionalElement.nextElementSibling
 
         while(nextElementSibling) {
             if(nextElementSibling.dataset.hasOwnProperty('elseIf')) {
-                this.hideElement(nextElementSibling)
+                helpers.hideElement(nextElementSibling)
                 conditionals['elseIf'].push(nextElementSibling)
                 nextElementSibling = nextElementSibling.nextElementSibling
             } else if(nextElementSibling.dataset.hasOwnProperty('else')) {
-                this.hideElement(nextElementSibling)
+                helpers.hideElement(nextElementSibling)
                 conditionals['else'] = nextElementSibling
                 nextElementSibling = null
             } else {
@@ -283,7 +262,7 @@ export default class Cat {
         let parsedIfCondition = this.getParsedExpression(conditionals.if.dataset.if, conditionals.if)
 
         if(parsedIfCondition) {
-            this.showElement(conditionals.if)
+            helpers.showElement(conditionals.if)
             this.handleDataValueElements(conditionals.if)
         } else {
             let conditionMet = false
@@ -292,14 +271,14 @@ export default class Cat {
                 let parsedElseIfCondition = this.getParsedExpression(elseIf.dataset.elseIf, elseIf)
                 if(!conditionMet && parsedElseIfCondition) {
                     conditionMet = true
-                    this.showElement(elseIf)
+                    helpers.showElement(elseIf)
                     this.handleDataValueElements(elseIf)
                 }
             })
 
             if(!conditionMet && conditionals.else) {
                 conditionMet =  true
-                this.showElement(conditionals.else)
+                helpers.showElement(conditionals.else)
                 this.handleDataValueElements(conditionals.else)
             }
         }

@@ -16,3 +16,24 @@ export function getDatasetElements(parentElement, datasetWildcard) {
     })
     return elements
 }
+
+export function textNodesUnder(element, match=null) {
+    let n
+    let textNodes = []
+    let walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false)
+    while(n=walk.nextNode()) {
+        textNodes.push(n)
+    }
+    if(match) {
+        textNodes = textNodes.filter(textNode => textNode.nodeValue.match(match))
+    }
+    return textNodes
+}
+
+export function hideElement(element) {
+    element.hidden = true
+}
+
+export function showElement(element) {
+    element.hidden = ''
+}

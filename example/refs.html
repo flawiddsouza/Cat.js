@@ -1,0 +1,22 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    <input type="text" data-ref="input"><br>
+    Open console and type something into the input box
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    methods: {
+        test() {
+            this.$refs.input.addEventListener('input', (e) => {
+                console.log('input event captured')
+            })
+        }
+    },
+    mounted() {
+        this.test()
+    }
+})
+</script>

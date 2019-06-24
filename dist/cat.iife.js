@@ -231,6 +231,8 @@ var Cat = (function () {
 
             this.proxy = new Proxy(this, this.handleDataBindings());
 
+            this.$refs = {};
+
             // handle data
             if(paramsObject.data) {
                 for(let key in paramsObject.data) {
@@ -265,6 +267,9 @@ var Cat = (function () {
                 } else {
                     this.rootElement = paramsObject.el;
                 }
+
+                // handle html > data-ref
+                this.handleRefs();
 
                 // handle html > data-loop
                 this.handleLoopElements();
@@ -607,7 +612,14 @@ var Cat = (function () {
             }
             return {
                 get(target, prop, receiver) {
-                    if(typeof target[prop] === 'object' && target[prop] !== null) {
+                    let createProxy = true;
+                    if(typeof target[prop] !== 'object' || target[prop] === null) {
+                        createProxy = false;
+                    }
+                    if(target[prop] instanceof HTMLElement) { // if item is dom element, don't proxy it
+                        createProxy = false;
+                    }
+                    if(createProxy) {
                         parentPath = parentPath ? parentPath + '.' : '';
                         return new Proxy(target[prop], _this.handleDataBindings(_this, parentPath + prop))
                     } else {
@@ -775,6 +787,16 @@ var Cat = (function () {
                 } else if(path.startsWith(watchedProp + '.')) { // watch parent that has props under it
                     this.watch[watchedProp].call(this.proxy);
                 }
+            });
+        }
+
+        handleRefs(element=null) {
+            if(!element) {
+                element = this.rootElement;
+            }
+
+            element.querySelectorAll('[data-ref]').forEach(element => {
+                this.$refs[element.dataset.ref] = element;
             });
         }
     }

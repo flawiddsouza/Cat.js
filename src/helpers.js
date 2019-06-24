@@ -6,7 +6,13 @@ export function forEach(array, callback, scope) {
 
 export function getDatasetElements(parentElement, datasetWildcard) {
     let elements = []
-    forEach(parentElement.getElementsByTagName('*'), element => {
+    let foundElements = null
+    if(parentElement['getElementsByTagName']) {
+        foundElements = parentElement.getElementsByTagName('*')
+    } else { // needed when the parentElement is a document-fragment
+        foundElements = parentElement.querySelectorAll('*')
+    }
+    forEach(foundElements, element => {
         let datasetKeys = Object.keys(element.dataset)
         datasetKeys.forEach(datasetKey => {
             if(datasetKey.startsWith(datasetWildcard)) {

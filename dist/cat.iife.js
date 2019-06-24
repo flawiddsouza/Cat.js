@@ -246,14 +246,16 @@ var Cat = (function () {
                 }
             }
 
+            // handle watch
+            // -- this needs to come before created if it's
+            // -- gonna trigger on object changes inside created
+            if(paramsObject.watch) {
+                this.watch = paramsObject.watch;
+            }
+
             // handle created()
             if(paramsObject.created) {
                 paramsObject.created.call(this.proxy);
-            }
-
-            // handle watch
-            if(paramsObject.watch) {
-                this.watch = paramsObject.watch;
             }
 
             document.addEventListener('DOMContentLoaded', () => {
@@ -775,7 +777,7 @@ var Cat = (function () {
                 }
             });
             if(watchedProp) {
-                this.watch[watchedProp].call(this);
+                this.watch[watchedProp].call(this.proxy);
             }
         }
     }

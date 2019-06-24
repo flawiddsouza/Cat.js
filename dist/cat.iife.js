@@ -768,17 +768,14 @@ var Cat = (function () {
         }
 
         handleWatch(path) {
-            let watchedProp = Object.keys(this.watch).find(watchedProp2 => {
-                let regex = new RegExp(`^${watchedProp2}$`);
+            Object.keys(this.watch).forEach(watchedProp => {
+                let regex = new RegExp(`^${watchedProp}$`);
                 if(regex.test(path)) { // watch exact path
-                    return true
-                } else if(path.startsWith(watchedProp2) && typeof this[watchedProp2] === 'object') { // watch parent that has props under it
-                    return true
+                    this.watch[watchedProp].call(this.proxy);
+                } else if(path.startsWith(watchedProp + '.')) { // watch parent that has props under it
+                    this.watch[watchedProp].call(this.proxy);
                 }
             });
-            if(watchedProp) {
-                this.watch[watchedProp].call(this.proxy);
-            }
         }
     }
 

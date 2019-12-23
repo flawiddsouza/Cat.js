@@ -404,6 +404,8 @@ var Cat = (function () {
                 }
             }
 
+            // unchanged loop item should not be rerendered or touched
+
             loop.forEach((item, itemIndex) => {
 
                 item = {

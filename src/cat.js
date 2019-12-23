@@ -181,6 +181,8 @@ export default class Cat {
             }
         }
 
+        // unchanged loop item should not be rerendered or touched
+
         loop.forEach((item, itemIndex) => {
 
             item = {

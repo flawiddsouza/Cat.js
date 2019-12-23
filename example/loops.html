@@ -1,40 +1,50 @@
 <script src="cat.iife.js"></script>
 
 <main id="cat">
-    <div data-loop="item in arrayOfObjects">
-        {{ item.data }}
+    <div style="display: flex">
+        <div>
+            <div data-loop="item in arrayOfObjects">
+                {{ item.data }}
+            </div>
+            <br>
+            <div data-loop="(item, index) in arrayOfObjects">
+                <b>{{ index }}</b> {{ item.data }}
+            </div>
+            <br>
+            <div data-loop="(item) in arrayOfObjects">
+                {{ item.data }}
+            </div>
+            <br>
+            <table>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-loop="item in arrayOfObjects">
+                        <td><a href="#" data-on-click.prevent="alert(item.id)">{{ item.data }}</a></td>
+                        <td>{{ item.data }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            Array of Elements:
+            <div data-loop="(item, i) in arrayOfElements">
+                Index: {{ i }}, Value: {{ item }}
+            </div>
+            <br>
+            Array of Number:
+            <div data-loop="(item, i) in 10" data-model="item">Index: {{ i }}, Value: {{ item }}</div>
+            <br>
+        </div>
+        <div style="margin-left: 5em; height: 90vh; overflow-y: auto">
+            <div data-loop="(item, i) in itemPush">
+                {{ item }} {{ i }}
+            </div>
+        </div>
     </div>
-    <br>
-    <div data-loop="(item, index) in arrayOfObjects">
-        <b>{{ index }}</b> {{ item.data }}
-    </div>
-    <br>
-    <div data-loop="(item) in arrayOfObjects">
-        {{ item.data }}
-    </div>
-    <br>
-    <table>
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>data</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr data-loop="item in arrayOfObjects">
-                <td><a href="#" data-on-click.prevent="alert(item.id)">{{ item.data }}</a></td>
-                <td>{{ item.data }}</td>
-            </tr>
-        </tbody>
-    </table>
-    <br>
-    Array of Elements:
-    <div data-loop="(item, i) in arrayOfElements">
-        Index: {{ i }}, Value: {{ item }}
-    </div>
-    <br>
-    Array of Number:
-    <div data-loop="(item, i) in 10">Index: {{ i }}, Value: {{ item }}</div>
 </main>
 
 <script>
@@ -56,7 +66,15 @@ new Cat({
             'cat',
             2,
             3
-        ]
+        ],
+        itemPush: []
+    },
+    created() {
+        setInterval(() => {
+            if(this.itemPush.length < 500) {
+                this.itemPush.push('test')
+            }
+        }, 0)
     }
 })
 </script>

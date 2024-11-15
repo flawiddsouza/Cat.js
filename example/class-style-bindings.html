@@ -1,0 +1,46 @@
+<script src="cat.iife.js"></script>
+
+<main id="cat">
+    <div>
+        <label>
+            <input type="checkbox" data-model="isRed"> Toggle Red
+        </label>
+        <br>
+        <label>
+            <input type="checkbox" data-model="isBold"> Toggle Bold
+        </label>
+        <br>
+        <label>
+            <input type="checkbox" data-model="isVisible"> Toggle Visibility
+        </label>
+        <br>
+        <label>
+            Font Size <input type="text " data-model="fontSize">
+        </label>
+        <br>
+    </div>
+    <div data-class="{ 'red': isRed, 'bold': isBold }" data-style="{ 'font-size': fontSize + 'px', 'display': isVisible ? 'block' : 'none' }">
+        This text will change based on the bindings.
+    </div>
+</main>
+
+<script>
+new Cat({
+    el: '#cat',
+    data: {
+        isRed: false,
+        isBold: false,
+        isVisible: true,
+        fontSize: 16
+    }
+})
+</script>
+
+<style>
+.red {
+    color: red;
+}
+.bold {
+    font-weight: bold;
+}
+</style>

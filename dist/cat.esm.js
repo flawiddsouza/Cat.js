@@ -292,6 +292,12 @@ class Cat {
             // handle html > data-model
             this.handleDataModelElements();
 
+            // handle html > data-style
+            this.handleStyleBindings();
+
+            // handle html > data-class
+            this.handleClassBindings();
+
             // unhide root element if hidden
             this.rootElement.hidden = false;
 
@@ -303,7 +309,27 @@ class Cat {
 
     }
 
+    splitAtFirstColon(string) {
+        let colonIndex = string.indexOf(':');
+        let first = string.slice(0, colonIndex);
+        let second = string.slice(colonIndex + 1);
+        return [first, second]
+    }
+
     getParsedExpression(unparsedExpression, element) {
+        // Parsing object-like expressions
+        if (unparsedExpression.trim().startsWith('{') && unparsedExpression.trim().endsWith('}')) {
+            let objectString = unparsedExpression.trim().slice(1, -1);
+            const keyValues = objectString.split(',');
+            const object = {};
+            keyValues.forEach(keyValue => {
+                const [key, value] = this.splitAtFirstColon(keyValue);
+                const cleanedKey = key.trim().replace(/['"]+/g, '');
+                object[cleanedKey] = this.getParsedExpression(value.trim(), element);
+            });
+            return object
+        }
+
         // if(!this.parsedExpressions.hasOwnProperty(unparsedExpression)) { // removing this reduces performance but enables dataBindings
             let tokens  = tokenize(unparsedExpression);
 
@@ -641,20 +667,32 @@ class Cat {
                 let actualProp = path.split('.')[0];
                 if(_this.dataBindings.hasOwnProperty(actualProp)) {
                     _this.dataBindings[actualProp].forEach(elementToRefresh => {
-                        if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('value')) {
-                            _this.handleDataValueElement(elementToRefresh);
-                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('model')) {
-                            _this.handleDataModelValueUpdate(elementToRefresh);
-                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('loop')) {
-                            _this.handleLoopElement(elementToRefresh);
-                            elementToRefresh.loopItems.forEach(loopItem => {
-                                _this.handleEchoElements(loopItem); // this
-                                _this.handleEventListeners(loopItem);
-                                _this.handleConditionalElements(loopItem); // plus this add extreme lag if the array is being updated very quickly, like when text is being entered into an input element aka the input event - it's really bad
-                            });
-                        } else if(elementToRefresh.nodeType === Node.ELEMENT_NODE && elementToRefresh.dataset.hasOwnProperty('if')) {
-                            _this.handleConditionalElement(elementToRefresh);
-                        } else {
+                        if (elementToRefresh.nodeType === Node.ELEMENT_NODE) {
+                            if (elementToRefresh.dataset.hasOwnProperty('value')) {
+                                _this.handleDataValueElement(elementToRefresh);
+                            }
+                            if (elementToRefresh.dataset.hasOwnProperty('model')) {
+                                _this.handleDataModelValueUpdate(elementToRefresh);
+                            }
+                            if (elementToRefresh.dataset.hasOwnProperty('loop')) {
+                                _this.handleLoopElement(elementToRefresh);
+                                elementToRefresh.loopItems.forEach(loopItem => {
+                                    _this.handleEchoElements(loopItem);
+                                    _this.handleEventListeners(loopItem);
+                                    _this.handleConditionalElements(loopItem);
+                                });
+                            }
+                            if (elementToRefresh.dataset.hasOwnProperty('if')) {
+                                _this.handleConditionalElement(elementToRefresh);
+                            }
+                            if (elementToRefresh.dataset.hasOwnProperty('style')) {
+                                _this.updateStyleBinding(elementToRefresh);
+                            }
+                            if (elementToRefresh.dataset.hasOwnProperty('class')) {
+                                _this.updateClassBinding(elementToRefresh);
+                            }
+                        }
+                        if (elementToRefresh.unparsedExpression) {
                             _this.handleEcho(elementToRefresh.unparsedExpression, elementToRefresh);
                         }
                     });
@@ -803,6 +841,44 @@ class Cat {
         element.querySelectorAll('[data-ref]').forEach(element => {
             this.$refs[element.dataset.ref] = element;
         });
+    }
+
+    handleStyleBindings(element = null) {
+        if (!element) {
+            element = this.rootElement;
+        }
+        let styleElements = element.querySelectorAll('[data-style]');
+        styleElements.forEach(styleElement => {
+            this.updateStyleBinding(styleElement);
+        });
+    }
+
+    updateStyleBinding(element) {
+        let styleObject = this.getParsedExpression(element.dataset.style, element);
+        for (let property in styleObject) {
+            element.style[property] = styleObject[property];
+        }
+    }
+
+    handleClassBindings(element = null) {
+        if (!element) {
+            element = this.rootElement;
+        }
+        let classElements = element.querySelectorAll('[data-class]');
+        classElements.forEach(classElement => {
+            this.updateClassBinding(classElement);
+        });
+    }
+
+    updateClassBinding(element) {
+        let classObject = this.getParsedExpression(element.dataset.class, element);
+        for (let className in classObject) {
+            if (classObject[className]) {
+                element.classList.add(className);
+            } else {
+                element.classList.remove(className);
+            }
+        }
     }
 }
 

@@ -19,8 +19,24 @@
         </label>
         <br>
     </div>
+    <br>
     <div data-class="{ 'red': isRed, 'bold': isBold }" data-style="{ 'font-size': fontSize + 'px', 'display': isVisible ? 'block' : 'none' }">
         This text will change based on the bindings.
+    </div>
+    <br>
+    <div data-loop="size in fontSizes">
+        <div data-style="{ 'font-size': size + 'px' }">Size {{ size }}</div>
+    </div>
+    <br>
+    <div>
+        <a href="#" data-on-click.prevent="filterMoviesByLanguage('All')" style="cursor: pointer;" data-style="{ 'text-decoration': `${selectedLanguage === 'All' ? 'none' : 'underline'}` }">All</a>
+        <span data-loop="language in languages">
+            | <a href="#" data-on-click.prevent="filterMoviesByLanguage(language)" style="cursor: pointer;" data-style="{ 'text-decoration': `${language === selectedLanguage ? 'none' : 'underline'}` }">{{ language }}</a>
+        </span>
+    </div>
+    <br>
+    <div>
+        {{ selectedLanguage }}
     </div>
 </main>
 
@@ -31,7 +47,20 @@ new Cat({
         isRed: false,
         isBold: false,
         isVisible: true,
-        fontSize: 16
+        fontSize: 16,
+        fontSizes: [12, 16, 20, 24],
+        languages: [],
+        selectedLanguage: 'English'
+    },
+    methods: {
+        filterMoviesByLanguage(language) {
+            this.selectedLanguage = language
+        }
+    },
+    mounted() {
+        setTimeout(() => {
+            this.languages = ['English', 'Spanish', 'French', 'German']
+        }, 500)
     }
 })
 </script>

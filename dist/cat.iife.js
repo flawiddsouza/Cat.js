@@ -683,6 +683,8 @@ var Cat = (function () {
                                         _this.handleEchoElements(loopItem);
                                         _this.handleEventListeners(loopItem);
                                         _this.handleConditionalElements(loopItem);
+                                        _this.handleStyleBindings(loopItem);
+                                        _this.handleClassBindings(loopItem);
                                     });
                                 }
                                 if (elementToRefresh.dataset.hasOwnProperty('if')) {
@@ -851,6 +853,7 @@ var Cat = (function () {
                 element = this.rootElement;
             }
             let styleElements = element.querySelectorAll('[data-style]');
+            styleElements = Array.from(styleElements).filter(styleElement => !this.isParentElementDataLoop(styleElement));
             styleElements.forEach(styleElement => {
                 this.updateStyleBinding(styleElement);
             });
@@ -868,6 +871,7 @@ var Cat = (function () {
                 element = this.rootElement;
             }
             let classElements = element.querySelectorAll('[data-class]');
+            classElements = Array.from(classElements).filter(classElement => !this.isParentElementDataLoop(classElement));
             classElements.forEach(classElement => {
                 this.updateClassBinding(classElement);
             });
